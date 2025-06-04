@@ -1,0 +1,128 @@
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный фон */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Убедимся, что попап поверх всего */
+}
+
+.popup-content {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; /* Шрифт без засечек как в примере */
+  background-color: #ffffff; /* Белый фон попапа, как в примере */
+  padding: 40px; /* Увеличиваем отступ */
+  border-radius: 12px; /* Делаем углы более скругленными */
+  position: relative; /* Для позиционирования кнопки закрытия */
+  max-width: 400px; /* Уменьшаем максимальную ширину для десктопа */
+  max-height: 90vh; /* Ограничиваем максимальную высоту чуть больше */
+  overflow-y: auto; /* Добавляем скролл, если контент не помещается */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Более выраженная тень */
+  width: 90%; /* Занимаем 90% ширины для адаптивности */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center; /* Центрируем текст внутри попапа */
+}
+
+.popup-content h2 {
+  margin-top: 0;
+  margin-bottom: 25px; /* Увеличиваем отступ снизу */
+  font-size: 1.6em; /* Увеличиваем размер заголовка */
+  color: #333; /* Темнее цвет заголовка */
+}
+
+.close-button {
+  position: absolute;
+  top: 15px; /* Отступ сверху */
+  right: 15px; /* Отступ справа */
+  background: none;
+  border: none;
+  font-size: 1.8em; /* Увеличиваем размер кнопки закрытия */
+  cursor: pointer;
+  color: #888; /* Чуть светлее цвет кнопки закрытия */
+}
+
+.gift-illustration {
+  max-width: 100%; /* Иллюстрация на всю ширину контейнера */
+  height: auto; /* Автоматическая высота для сохранения пропорций */
+  max-height: 35vh; /* Ограничиваем максимальную высоту немного */
+  display: block;
+  margin: 0 auto 30px auto; /* Центрируем и добавляем больший отступ снизу */
+}
+
+.promo-input-container {
+  display: flex;
+  flex-direction: column; /* Поле ввода и кнопка в столбик по умолчанию */
+  gap: 15px; /* Отступ между полем и кнопкой */
+  margin-bottom: 20px; /* Увеличиваем отступ */
+  width: 100%; /* Занимает всю доступную ширину */
+  max-width: 300px; /* Ограничиваем ширину контейнера с полем и кнопкой */
+}
+
+.promo-input {
+  flex-grow: 1; /* Поле ввода занимает максимум места */
+  padding: 12px 18px; /* Внутренние отступы */
+  border: none; /* Убираем рамку */
+  background-color: #f2f2f2; /* Еще более светлый серый фон */
+  border-radius: 25px; /* Сильнее скругленные углы */
+  font-size: 1em;
+  outline: none; /* Убираем стандартную обводку при фокусе */
+  text-align: center; /* Центрируем текст внутри поля ввода */
+  color: #333; /* Темнее цвет текста */
+}
+
+.activate-button {
+  padding: 12px 25px; /* Внутренние отступы */
+  background-color: #e0e0e0; /* Серый цвет кнопки как в примере */
+  color: #555; /* Темно-серый текст */
+  border: none;
+  border-radius: 25px; /* Сильнее скругленные углы */
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Кнопка занимает всю ширину в контейнере */
+}
+
+.activate-button:hover {
+  background-color: #d5d5d5;
+}
+
+.no-promo-link {
+  text-align: center;
+  font-size: 0.9em;
+  margin-bottom: 15px; /* Увеличиваем отступ снизу */
+  color: #0070d2; /* Синий цвет ссылки */
+  text-decoration: underline; /* Подчеркивание как в примере */
+  cursor: pointer;
+}
+
+.terms-text {
+  text-align: center;
+  font-size: 0.75em; /* Немного увеличиваем размер текста */
+  color: #888; /* Чуть светлее тусклый цвет текста */
+  line-height: 1.4; /* Увеличиваем межстрочный интервал */
+}
+
+/* Стилизация для мобильных устройств */
+@media (max-width: 600px) {
+  .popup-content {
+    padding: 25px;
+    width: 95%;
+    max-width: none; /* Убираем ограничение ширины */
+  }
+  
+  .promo-input-container {
+    gap: 15px;
+    max-width: none; /* Убираем ограничение ширины */
+  }
+
+  .activate-button {
+      width: 100%; /* Кнопка занимает всю ширину */
+  }
+} 

@@ -1,0 +1,243 @@
+.premier-page-container {
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+.premier-page-container h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.promo-banner-link {
+  display: block;
+  margin: 20px auto;
+  max-width: 800px;
+  text-decoration: none;
+}
+
+.promo-banner {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.promo-banner-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.premier-header {
+  background-color: #f0f0f0; /* Placeholder background */
+  padding: 10px 20px;
+  text-align: center;
+  margin-bottom: 20px; /* Отступ после шапки */
+}
+
+.premier-main-content {
+  padding: 0 20px;
+  max-width: 1000px; /* Примерная максимальная ширина основного контента */
+  margin: 0 auto; /* Центрируем основной контент */
+}
+
+.subscription-section {
+  margin-bottom: 30px; /* Отступ после секции */
+}
+
+.premier-footer {
+  background-color: #f0f0f0; /* Placeholder background */
+  padding: 20px;
+  text-align: center;
+  margin-top: 30px; /* Отступ перед футером */
+}
+
+.premier-subscription-section {
+  margin-bottom: 40px; /* Отступ после секции подписок */
+}
+
+.premier-subscription-section h2 {
+  text-align: center;
+  margin-bottom: 30px; /* Отступ после заголовка секции */
+  font-size: 2em; /* Размер заголовка */
+  color: #ffffff; /* Белый цвет текста */
+}
+
+.tariff-cards-container {
+  display: flex;
+  justify-content: center; /* Центрируем карточки */
+  gap: 20px; /* Отступ между карточками */
+  flex-wrap: wrap; /* Перенос на новую строку на узких экранах */
+}
+
+.tariff-card {
+  background-color: #222222; /* Темный фон карточки */
+  border-radius: 12px; /* Скругленные углы */
+  padding: 20px;
+  width: 280px; /* Фиксированная ширина карточки (можно скорректировать) */
+  display: flex;
+  flex-direction: column; /* Элементы в столбик */
+  align-items: center; /* Центрируем содержимое по горизонтали */
+  color: #ffffff; /* Белый цвет текста по умолчанию */
+  position: relative; /* Для позиционирования графики */
+  overflow: hidden; /* Скрываем графику за пределами карточки */
+}
+
+.tariff-card.highlighted {
+  background: linear-gradient(to top, #ff8c00, #ffc300); /* Градиентный фон для выделенной карточки */
+  color: #000000; /* Темный текст для выделенной карточки */
+}
+
+.tariff-header {
+  display: flex;
+  justify-content: space-between; /* Заголовок и скидка по краям */
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.tariff-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.discount-badge {
+  background-color: #ff0000; /* Красный фон для скидки */
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.tariff-price {
+  font-size: 1.8em; /* Размер цены */
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.tariff-details {
+  font-size: 0.9em;
+  color: #cccccc; /* Светлее цвет текста деталей */
+  margin-bottom: 15px;
+}
+
+.tariff-card.highlighted .tariff-details {
+   color: #555555; /* Темнее текст деталей для выделенной карточки */
+}
+
+.tariff-button {
+  background-color: #000000; /* Черный фон кнопки */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px; /* Скругленные углы кнопки */
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px; /* Отступ сверху кнопки */
+}
+
+.tariff-card.highlighted .tariff-button {
+   background-color: #ffffff; /* Белый фон кнопки для выделенной карточки */
+   color: #000000; /* Черный текст для выделенной карточки */
+}
+
+.tariff-button:hover {
+  background-color: #333333;
+}
+
+.tariff-card.highlighted .tariff-button:hover {
+   background-color: #eeeeee;
+}
+
+.tariff-graphic-placeholder {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 4em;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.1); /* Полупрозрачный белый */
+  transform: translate(20%, -20%); /* Сдвигаем для эффекта */
+  z-index: 0; /* За графикой */
+}
+
+.tariff-card.highlighted .tariff-graphic-placeholder {
+   color: rgba(0, 0, 0, 0.1); /* Полупрозрачный черный для выделенной карточки */
+}
+
+@media (max-width: 768px) {
+  .tariff-cards-container {
+    flex-direction: column; /* Карточки в столбик на узких экранах */
+    align-items: center; /* Центрируем карточки в столбике */
+  }
+  
+  .tariff-card {
+    width: 90%; /* Карточка занимает 90% ширины */
+    max-width: 300px; /* Ограничиваем максимальную ширину */
+  }
+}
+
+.premier-advantages-section {
+  margin-bottom: 40px; /* Отступ после секции преимуществ */
+}
+
+.premier-advantages-section h2 {
+  text-align: center;
+  margin-bottom: 30px; /* Отступ после заголовка секции */
+  font-size: 2em;
+  color: #ffffff; /* Белый цвет текста */
+}
+
+.advantages-container {
+  display: flex;
+  gap: 20px; /* Отступ между элементами преимуществ */
+  flex-wrap: wrap; /* Перенос на новую строку */
+  justify-content: center; /* Центрируем элементы */
+}
+
+.advantage-item {
+  background-color: #222222; /* Темный фон элемента преимущества */
+  border-radius: 12px;
+  padding: 20px;
+  width: 350px; /* Примерная ширина элемента (можно скорректировать) */
+  color: #ffffff; /* Белый цвет текста */
+  position: relative; /* Для позиционирования графики */
+  overflow: hidden;
+}
+
+.advantage-item h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.3em;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.advantage-item p {
+  margin: 0;
+  font-size: 1em;
+  color: #cccccc;
+  line-height: 1.5;
+}
+
+.advantage-graphic-placeholder {
+  margin-top: 15px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.1); /* Полупрозрачный белый */
+  font-size: 3em;
+}
+
+@media (max-width: 768px) {
+  .advantages-container {
+    flex-direction: column; /* Элементы в столбик на узких экранах */
+    align-items: center;
+  }
+  
+  .advantage-item {
+    width: 90%;
+    max-width: 350px;
+  }
+} 

@@ -1,0 +1,52 @@
+import React from 'react';
+import './GiftCard.css'; // Создадим этот файл стилей позже
+
+export interface GiftCardProps {
+  id: number; // Добавляем ID, если еще нет
+  logo: string; // Путь к логотипу партнера (теперь главная картинка)
+  // illustration?: string; // Удаляем, используем logo как основную картинку
+  title: string; // Название подарка (теперь часть текста)
+  description: string; // Описание подарка (теперь часть текста)
+  points: string; // **ДОБАВЛЕНО** Поле для баллов
+  isHighlighted?: boolean; // Метка ХИТ
+  isSelected?: boolean; // Выбранная карточка (для подсветки)
+  isClaimed?: boolean; // Активированный подарок
+  onClick: (id: number) => void; // Обработчик клика
+  disabled?: boolean; // Отключенное состояние
+  className?: string; // Добавляем опциональное свойство className
+}
+
+const GiftCard: React.FC<GiftCardProps> = ({ id, logo, title, description, points, isHighlighted, isSelected, isClaimed, onClick, disabled, className }) => {
+  const handleClick = () => {
+    if (!disabled) {
+      onClick(id);
+    }
+  };
+
+  return (
+    <div 
+      className={`gift-card ${isHighlighted ? 'highlighted' : ''} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''} ${className || ''}`}
+      onClick={handleClick} // Используем локальный обработчик клика
+    >
+      {/* Метка ХИТ, если есть */}
+      {isHighlighted && <span className="highlight-label">ХИТ</span>}
+      
+      {/* Контейнер для логотипа (картинка сверху) */}
+      <div className="gift-card-image">
+        <img src={logo} alt={`${title} logo`} />
+      </div>
+
+      {/* Контейнер для текста (заголовок и описание под картинкой) */}
+      <div className="gift-card-text-content">
+        <h3>{title}</h3> {/* Заголовок */}
+        <p>{description}</p> {/* Описание */}
+        <p className="gift-points">{points}</p> {/* **ДОБАВЛЕНО** Отображение баллов */}
+      </div>
+      
+      {/* Удаляем отдельный блок для иконки подарка справа */}
+      
+    </div>
+  );
+};
+
+export default GiftCard; 

@@ -1,0 +1,366 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(180deg, rgba(0, 112, 210, 0.3) 0%, rgba(255, 255, 255, 0) 50%), #e0eaf4; /* Градиент: синий -> прозрачный, фон: очень светлый синий */
+  min-height: 100vh;
+  font-family: sans-serif;
+  color: #333; /* Темный цвет текста для светлого фона */
+  width: 100%; /* Убедимся, что body занимает всю ширину */
+  box-sizing: border-box; /* Учитываем padding, если вдруг появится */
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0; /* Убираем padding у #root */
+  text-align: center;
+  width: 100%; /* Убедимся, что #root занимает всю доступную ширину */
+  box-sizing: border-box; /* Учитываем padding */
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0; /* Уменьшаем вертикальный отступ, убираем горизонтальный */
+  width: 100%; /* Убедимся, что App занимает всю ширину */
+  box-sizing: border-box; /* Учитываем padding в ширине */
+}
+
+h1 {
+  color: #0070d2; /* Синий цвет для заголовка */
+  margin-bottom: 20px; /* Добавляем отступ снизу */
+  font-size: 2em; /* Увеличиваем размер заголовка */
+}
+
+.instruction-text {
+  font-size: 1.2em;
+  margin-bottom: 30px;
+  color: #555; /* Немного светлее, чем основной текст */
+}
+
+.top-info-section {
+  display: flex;
+  flex-direction: column; /* Иконка над таймером */
+  align-items: center; /* Центрируем по горизонтали */
+  margin-bottom: 20px; /* Отступ снизу */
+  width: 100%; /* Убедимся, что секция занимает всю доступную ширину */
+  padding: 0; /* Убираем padding, чтобы выравнивание происходило от центра App */
+  box-sizing: border-box; /* Учитываем padding в ширине */
+}
+
+.large-gift-icon {
+  width: 80px; /* Размер большой иконки (больше таймера) */
+  height: 80px;
+  margin-bottom: 10px; /* Отступ под иконкой перед таймером */
+  object-fit: contain;
+}
+
+.timer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer-box {
+  background-color: white;
+  padding: 10px 20px;
+  margin: 0 5px;
+  border-radius: 8px;
+  font-size: 1.5em; /* Уменьшаем размер шрифта таймера на мобильных */
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: #0070d2; /* Синий цвет цифр */
+}
+
+.timer-separator {
+  font-size: 1.5em; /* Уменьшаем размер шрифта разделителя на мобильных */
+  font-weight: bold;
+  color: #0070d2; /* Синий цвет разделителя */
+}
+
+.gift-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* Позволяем контейнеру занимать всю ширину */
+  max-width: none; /* Убираем ограничение по максимальной ширине */
+  padding: 0 10px; /* Добавляем небольшой горизонтальный отступ к основному контейнеру */
+  box-sizing: border-box; /* Учитываем padding */
+}
+
+.gift-content {
+  margin-bottom: 0; /* Убираем нижний отступ */
+  background-color: transparent; /* Делаем фон прозрачным */
+  padding: 0; /* Убираем внутренние отступы */
+  border-radius: 0; /* Убираем скругленные углы */
+  box-shadow: none; /* Убираем тень */
+  width: 100%;
+}
+
+.gaming-mechanic-placeholder {
+  width: 100%;
+  min-height: 300px; /* Минимальная высота плейсхолдера */
+  background-color: white; /* Белый фон для плейсхолдера */
+  border: 1px solid #ddd; /* Сплошная светлая рамка */
+  border-radius: 8px; /* Скругленные углы */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5em;
+  color: #aaa; /* Более тусклый цвет текста */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+.gift-cards-list {
+  display: flex;
+  flex-direction: column; /* Располагаем элементы в колонку */
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 15px; /* Расстояние между карточками */
+  padding: 0;
+  list-style: none;
+  width: 100%;
+  /* Стили для вертикального списка, если нужен скролл */
+  /* max-height: 400px; /* Пример: ограничение высоты */
+  /* overflow-y: auto; */
+}
+
+.infinite-scroll-container {
+  margin: 20px 0; /* Вертикальные отступы */
+  overflow-x: auto; /* Горизонтальный скролл */
+  overflow-y: hidden; /* Вертикальный скролл скрыт */
+  width: 100%;
+  padding: 0 10px; /* Горизонтальные отступы для скролла */
+  width: 100%; /* Убедимся, что контейнер прокрутки занимает всю ширину */
+  box-sizing: border-box; /* Учитываем padding в ширине */
+  white-space: nowrap;
+  -ms-overflow-style: none;  /* IE и Edge */
+  scrollbar-width: none;  /* Firefox */
+  max-width: none; /* Убираем max-width, если он был установлен ранее и мешал адаптивности */
+}
+
+.infinite-scroll-container::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari и Opera */
+}
+
+.infinite-scroll-content {
+  display: flex;
+  flex-direction: row; /* Горизонтальное расположение */
+  gap: 10px; /* Отступ между карточками */
+  padding: 0; /* Убираем внутренние отступы */
+  transition: transform 0.1s linear;
+  width: auto; /* Ширина определяется содержимым */
+}
+
+/* Стили для анимации прокрутки */
+@keyframes spin {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(var(--spin-distance));
+  }
+}
+
+.spinning {
+  animation: spin 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Стили для карточек в ленте */
+.gift-card {
+  width: 100%;
+  min-width: 280px; /* Минимальная ширина карточки (примерно как в примере) */
+  max-width: 350px; /* Максимальная ширина */
+  height: 100px; /* Фиксированная высота карточки */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 10px; /* Внутренний отступ для контента */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box; /* Учитываем padding в ширине */
+  flex-shrink: 0; /* Не сжимать карточки */
+}
+
+.gift-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gift-card.selected {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 112, 210, 0.5);
+  border: 2px solid #0070d2;
+}
+
+/* Обертка для контейнера скролла и стрелок - скрываем или удаляем */
+.scroll-container-wrapper {
+  display: block; /* Или 'none' */
+  width: 100%;
+  max-width: 600px; /* Соответствует ширине контейнера сетки */
+  margin: 0 auto; /* Центрируем */
+  position: relative;
+}
+
+/* Стили для кнопок-стрелок - скрываем */
+.scroll-arrow {
+  display: none;
+}
+
+.gift-card {
+  /* background-color: white; */ /* Удаляем */
+  /* border-radius: 12px; */ /* Удаляем */
+  /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); */ /* Удаляем */
+  padding: 0;
+  margin-bottom: 0; /* Убираем нижний отступ, используем gap */
+  width: 100%; /* Делаем ширину 100% для вертикального стека в App.css */
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.gift-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gift-card.highlighted {
+  border-color: #ff8c00; /* Оранжевый/золотистый цвет для ХИТ, похожий на цвета GID */
+}
+
+.gift-card-logo img {
+  width: 40px;
+  height: 40px;
+  margin-right: 15px;
+  object-fit: contain;
+}
+
+.gift-card-info {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.gift-card-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.1em;
+  color: #333; /* Темный цвет */
+}
+
+.gift-card-info p {
+  margin: 0;
+  font-size: 0.9em;
+  color: #555; /* Чуть светлее */
+}
+
+.gift-card-gift-icon {
+  font-size: 2em;
+  margin-left: 15px;
+  color: #ff8c00; /* Оранжевый/золотистый цвет иконки */
+}
+
+.highlight-label {
+  position: absolute;
+  top: -10px; /* Поднимаем над карточкой */
+  right: 20px;
+  background-color: #ff8c00; /* Цвет фона лейбла */
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+/* Добавляем медиазапрос для мобильных устройств */
+@media (max-width: 600px) {
+  .App {
+    padding: 15px 0; /* Еще уменьшаем вертикальный padding */
+  }
+
+  .top-info-section {
+    padding: 0; /* Убираем padding, чтобы выравнивание происходило от центра App */
+  }
+
+  .large-gift-icon {
+    width: 60px; /* Уменьшаем размер иконки подарка */
+    height: 60px;
+  }
+
+  .timer-box,
+  .timer-separator {
+    font-size: 1.2em; /* Еще немного уменьшаем размер шрифта таймера */
+  }
+
+  .instruction-text {
+    font-size: 1em; /* Уменьшаем размер шрифта инструкции */
+    padding: 0 10px; /* Добавляем небольшой горизонтальный padding */
+    text-align: center; /* Центрируем текст инструкции */
+  }
+
+  .infinite-scroll-container {
+    padding: 0 10px; /* Горизонтальные отступы для скролла */
+    width: 100%; /* Убедимся, что контейнер прокрутки занимает всю ширину */
+    box-sizing: border-box; /* Учитываем padding в ширине */
+    max-width: none; /* Убираем max-width, если он был установлен ранее и мешал адаптивности */
+  }
+
+  .gift-card {
+    min-width: 250px; /* Уменьшаем минимальную ширину карточки */
+    max-width: none; /* Убираем максимальную ширину, чтобы карточки могли быть немного гибче */
+    height: 90px; /* Немного уменьшаем высоту карточки */
+    padding: 8px; /* Уменьшаем padding карточки */
+  }
+
+  .gift-card-image {
+    width: 70px; /* Уменьшаем размер контейнера логотипа */
+    height: 70px;
+    margin-right: 10px; /* Уменьшаем отступ справа от логотипа */
+  }
+
+  .gift-card-text-content h3 {
+    font-size: 0.9em; /* Уменьшаем шрифт заголовка */
+  }
+
+  .gift-card-text-content p {
+    font-size: 0.8em; /* Уменьшаем шрифт описания */
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@mui/icons-material": "^7.1.0",
+    "@mui/material": "^7.1.0",
+    "@splidejs/react-splide": "^0.7.12",
+    "react-material-ui-carousel": "^3.4.2"
+  }
+}

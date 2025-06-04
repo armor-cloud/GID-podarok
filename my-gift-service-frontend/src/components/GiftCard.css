@@ -1,0 +1,108 @@
+.gift-card {
+  background-color: white; /* Белый фон */
+  border-radius: 12px; /* Закругленные углы */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Более выраженная тень */
+  padding: 10px; /* Внутренний отступ для контента */
+  margin-bottom: 15px; /* Вертикальный отступ между карточками */
+  width: 180px; /* Ширина карточки */
+  display: flex;
+  flex-direction: row; /* Элементы в строку */
+  align-items: center; /* Выравнивание по центру по горизонтали */
+  cursor: pointer;
+  position: relative; /* Для позиционирования надписи ХИТ */
+  overflow: visible; /* Разрешаем отображение содержимого за рамками */
+  height: 100px; /* Фиксированная высота карточки */
+  box-sizing: border-box; /* Учитываем padding в общих размерах */
+}
+
+.gift-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Убираем оранжевую обводку для выделенного подарка */
+/* .gift-card.highlighted { */
+/*   border: 2px solid #ff8c00; */ /* Оранжевая обводка для выделенного подарка */
+/* } */
+
+.gift-card.selected {
+  background-color: transparent; /* Прозрачный фон */
+  border: 3px solid #007bff; /* Синяя рамка */
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.6); /* Синяя тень */
+  transform: scale(1.05); /* Немного увеличиваем выбранную карточку */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out; /* Плавный переход для всех свойств */
+  z-index: 1; /* Поднимаем выбранную карточку выше */
+}
+
+.gift-card-image {
+  width: 90px; /* Устанавливаем фиксированную ширину контейнера логотипа */
+  height: 100%; /* Контейнер логотипа занимает всю высоту родителя (карточки с учетом padding) */
+  margin-right: 15px; /* Отступ справа от контейнера логотипа */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0; /* Предотвращаем сжатие контейнера логотипа */
+}
+
+.gift-card-image img {
+  width: 100%; /* Изображение занимает всю ширину контейнера */
+  height: 100%; /* Изображение занимает всю высоту контейнера */
+  object-fit: contain; /* Сохраняем пропорции */
+  display: block; /* Убираем возможный нижний отступ у img */
+}
+
+.gift-card-text-content {
+  flex-grow: 1; /* Занимает все доступное пространство */
+  padding: 0; /* Убираем лишний padding, так как он есть у .gift-card */
+  text-align: left; /* Выравнивание текста по левому краю */
+  box-sizing: border-box; /* Учитываем padding в ширине */
+  overflow: hidden; /* Скрываем возможный переполнение текста */
+  text-overflow: ellipsis; /* Добавляем многоточие, если текст не помещается */
+  white-space: normal; /* Разрешаем перенос текста */
+}
+
+.gift-card-text-content h3 {
+  margin: 0 0 4px 0; /* Отступ снизу от заголовка */
+  font-size: 1em;
+  font-weight: bold;
+  color: #333;
+  line-height: 1.2;
+}
+
+.gift-card-text-content p {
+  margin: 0;
+  font-size: 0.9em;
+  color: #555;
+  line-height: 1.3;
+}
+
+.highlight-label {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ff8c00;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  z-index: 1; /* Убедимся, что метка поверх изображения */
+}
+
+/* Удаляем старые стили, которые больше не нужны */
+/*
+.gift-card-logo, .gift-card-info, .gift-card-icon, .gift-card-arrow {
+  display: none;
+}
+*/
+
+@media (max-width: 768px) {
+    .gift-card {
+        width: 120px; /* Уменьшаем ширину карточки для мобильных устройств (140px контейнер - 20px padding) */
+    }
+
+    .gift-card-image {
+        width: 70px; /* Корректируем размер изображения */
+    }
+} 

@@ -1,0 +1,548 @@
+/* Enterprise-level styles for the Gift Page */
+
+/* General page styles */
+body {
+  background-color: #ffffff; /* White background */
+  color: #333333; /* Dark text for contrast */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  overflow-x: hidden; /* Prevent horizontal scroll caused by design elements */
+  position: relative;
+}
+
+/* Subtle background texture or pattern */
+/* REMOVED */
+
+
+/* Content Wrapper for centering and padding */
+.page-content-wrapper {
+  max-width: 1280px; /* Slightly wider for more content */
+  margin: 0 auto;
+  padding: 40px 20px; /* Generous padding */
+  position: relative;
+  z-index: 1;
+  text-align: center; /* Center content */
+}
+
+/* Header Gift Icon */
+.large-gift-icon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 30px;
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+
+/* Instruction Text */
+.instruction-text {
+  color: #555555; /* Slightly lighter dark text color */
+  font-size: 1.1rem;
+  margin: 20px 0 40px 0;
+}
+
+/* Timer styles */
+.timer-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* Reduced gap */
+  margin-bottom: 40px;
+  background-color: transparent; /* Transparent background */
+  border: none; /* Remove border */
+  border-radius: 0; /* Remove border-radius */
+  padding: 0; /* Remove padding */
+  box-shadow: none; /* Remove shadow */
+  position: relative;
+}
+
+.timer-box {
+  background-color: #ffffff; /* White background for numbers */
+  border-radius: 8px; /* More rounded corners */
+  padding: 15px 20px; /* Increased padding */
+  font-size: 2.8rem; /* Significantly larger font size */
+  font-weight: 300; /* Lighter font weight */
+  color: #333333; /* Dark text color */
+  min-width: 80px; /* Increased width for boxes */
+  text-align: center;
+  border: none; /* Remove border */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Modern subtle shadow */
+}
+
+.timer-separator {
+  color: #333333; /* Dark color for separator */
+  font-size: 2.5rem; /* Match font size approximately */
+  font-weight: 300; /* Match font weight */
+  padding-bottom: 0; /* Remove padding */
+}
+
+
+/* Gift List Scroll Container */
+.gift-list-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding: 30px 0;
+  margin: 0 auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  position: relative;
+
+  /* Add gradient masks to the sides */
+  mask-image: linear-gradient(to right,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%);
+  -webkit-mask-image: linear-gradient(to right,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%);
+}
+
+.gift-list-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.gift-list-content {
+  display: inline-flex;
+  gap: 20px;
+  padding: 0 20px;
+  align-items: center;
+}
+
+/* Individual Gift Card Container for spacing and effects */
+.gift-list-content .gift-card-container {
+    flex: 0 0 auto;
+    width: 220px; /* Slightly larger cards */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-radius: 15px;
+}
+
+.gift-card-container:hover {
+    transform: translateY(-8px);
+}
+
+
+/* Actual Gift Card Styles */
+.gift-card {
+    background-color: #ffffff; /* White card background */
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    justify-content: space-between;
+    transition: all 0.3s ease-in-out;
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    position: relative;
+}
+
+.gift-card img {
+    max-width: 90%;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.gift-card h3 {
+    font-size: 1em;
+    margin-bottom: 8px;
+    color: #333333; /* Dark text for heading */
+    font-weight: 600;
+}
+
+.gift-card p {
+    font-size: 0.9em;
+    color: #555555; /* Slightly lighter dark text for description */
+    flex-grow: 1;
+}
+
+/* Highlight label for 'ХИТ' */
+.gift-card .highlight-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #f97316;
+    color: white;
+    font-size: 0.7em;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+
+
+/* Selected Card Style */
+.gift-card.selected {
+  border-color: #6a5acd; /* Medium purple border */
+  box-shadow: 0 0 20px rgba(106, 90, 205, 0.5); /* Purple glow effect */
+  background-color: rgba(106, 90, 205, 0.1); /* Light purple accent background */
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 20px rgba(106, 90, 205, 0.5); }
+  50% { box-shadow: 0 0 30px rgba(106, 90, 205, 0.8); }
+  100% { box-shadow: 0 0 20px rgba(106, 90, 205, 0.5); }
+}
+
+
+/* Disabled Card Style */
+.gift-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+
+/* Spin Button */
+.spin-button {
+  background: linear-gradient(135deg, #6a5acd 0%, #8a2be2 100%); /* Purple gradient */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.spin-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8a2be2 0%, #6a5acd 100%); /* Reverse gradient on hover */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+.spin-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.spin-button:disabled {
+  background-color: #cccccc; /* Disabled color */
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+/* Popup styles (assuming a modal/dialog structure) */
+/* You might need corresponding JS/React for the actual modal logic */
+.success-popup {
+  /* Styles for the overlay */
+  background-color: rgba(200, 200, 200, 0.7); /* Light semi-transparent overlay */
+  backdrop-filter: blur(5px); /* Blur effect */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's on top */
+}
+
+.success-popup-content {
+  /* Styles for the modal content box */
+  background-color: #ffffff; /* White background */
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  color: #e0e6f1;
+  max-width: 500px;
+  width: 90%;
+  border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.success-popup-content h2 {
+  color: #6a5acd; /* Purple accent color for heading */
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.success-popup-content p {
+  color: #555555; /* Dark text for description */
+  margin-bottom: 25px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .page-content-wrapper {
+    padding: 30px 15px;
+  }
+
+  .large-gift-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+
+  .instruction-text {
+    font-size: 1rem;
+    margin: 15px 0 30px 0;
+  }
+
+  .timer-container {
+    padding: 10px 20px;
+  }
+
+  .timer-box {
+    padding: 6px 12px;
+    font-size: 1.5rem;
+    min-width: 50px;
+  }
+
+  .timer-separator {
+    font-size: 1.5rem;
+  }
+
+  .gift-list-scroll-container {
+    padding: 20px 0;
+    mask-image: linear-gradient(to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%);
+    -webkit-mask-image: linear-gradient(to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%);
+  }
+
+  .gift-list-content {
+    gap: 15px;
+    padding: 0 15px;
+  }
+
+  .gift-list-content .gift-card-container {
+    width: 180px; /* Adjust card width */
+  }
+
+  .gift-card {
+    padding: 15px;
+  }
+
+  .gift-card h3 {
+    font-size: 0.95em;
+  }
+
+  .gift-card p {
+    font-size: 0.85em;
+  }
+
+  .spin-button {
+    padding: 10px 25px;
+    font-size: 1rem;
+  }
+
+  .success-popup-content {
+    padding: 25px;
+  }
+
+  .success-popup-content h2 {
+    font-size: 1.3rem;
+  }
+}
+
+/* === Стили для блока заданий === */
+.tasks-section {
+  margin-top: 60px; /* Отступ сверху от карусели */
+  text-align: left; /* Выравнивание текста по левому краю */
+}
+
+.tasks-section h2 {
+  font-size: 1.8rem; /* Размер заголовка */
+  color: #333333; /* Цвет заголовка */
+  margin-bottom: 30px; /* Отступ под заголовком */
+  text-align: center; /* Центрируем заголовок */
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Slightly reduced gap between cards */
+}
+
+.task-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 16px 20px; /* Adjusted inner padding */
+  border: 1px solid #eeeeee;
+  overflow: hidden;
+}
+
+.task-main-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px; /* Adjusted margin */
+}
+
+.task-source {
+  font-size: 0.9em;
+  color: #555555;
+  font-weight: 600;
+}
+
+.task-source-logo {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.task-progress {
+  font-size: 0.9em; /* Adjusted size */
+  color: #007bff;
+  font-weight: 600;
+}
+
+.task-title {
+  font-size: 1.1em;
+  color: #333333;
+  margin-bottom: 12px; /* Adjusted margin */
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.task-link {
+  font-size: 0.9em;
+  color: #007bff;
+  text-decoration: none;
+  cursor: pointer;
+  margin-bottom: 8px; /* Reduced margin below link */
+}
+
+.task-details-section {
+  display: grid;
+  grid-template-rows: 0fr; /* Height 0 when collapsed */
+  transition: grid-template-rows 0.3s ease-in-out; /* Smooth transition */
+  /* Добавляем padding-bottom для создания пространства, когда развернуто */
+  padding-bottom: 0; /* Изначально 0 */
+  transition: grid-template-rows 0.3s ease-in-out, padding-bottom 0.3s ease-in-out; /* Анимируем padding-bottom тоже */
+}
+
+.task-details-section.expanded {
+  grid-template-rows: 1fr; /* Height auto when expanded */
+   padding-bottom: 16px; /* Add padding when expanded */
+}
+
+.task-details-content {
+  overflow: hidden;
+  display: flex; /* Changed to flex for layout of text blocks */
+  flex-direction: column; /* Stack text blocks vertically */
+  font-size: 0.85em;
+  color: #555555;
+  padding-top: 16px;
+  border-top: 1px solid #dddddd;
+  gap: 8px; /* Space between text blocks */
+}
+
+.task-additional-text, .task-additional-reward {
+  margin: 0; /* Remove default paragraph margins */
+  padding: 0; /* Remove default paragraph padding */
+}
+
+.task-reward {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px; /* Отступ сверху от дополнительного текста */
+}
+
+.task-toggle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px; /* Отступ сверху от основной части карточки */
+}
+
+.task-time {
+   display: flex;
+   align-items: center;
+   gap: 5px;
+   font-size: 0.85em;
+   color: #555555;
+}
+
+.task-arrow-circle {
+  width: 24px; /* Size of the circle */
+  height: 24px;
+  border: 1px solid #dddddd; /* Light border */
+  border-radius: 50%; /* Make it round */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out; /* Hover effect */
+}
+
+.task-arrow-circle:hover {
+  background-color: #f0f0f0; /* Light background on hover */
+}
+
+.task-toggle-arrow {
+  font-size: 0.8em; /* Smaller arrow size */
+  color: #555555; /* Dark gray color */
+  transform: rotate(0deg);
+  transition: transform 0.3s ease-in-out;
+  /* Remove margin-left and padding-left */
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.task-details-section.expanded .task-toggle-arrow {
+  transform: rotate(180deg);
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+  .tasks-section {
+    margin-top: 40px;
+  }
+
+  .tasks-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .task-card {
+    padding: 15px;
+  }
+
+  .task-title {
+    font-size: 1em;
+    margin-bottom: 10px;
+  }
+
+  .task-link {
+    font-size: 0.85em;
+    margin-bottom: 10px;
+  }
+
+  .task-details {
+    font-size: 0.8em;
+  }
+} 
