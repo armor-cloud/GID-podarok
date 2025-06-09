@@ -1,0 +1,88 @@
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: linear-gradient(180deg, #e3f0ff 0%, #ffffff 100%);
+}
+
+.thank-you-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 0 16px;
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #222;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  max-width: none;
+  margin: 0;
+}
+
+.thank-you-container h1 {
+  color: #0d47a1;
+  margin-bottom: 18px;
+  font-size: 2.8em;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.thank-you-container p {
+  color: #37474f;
+  margin-bottom: 10px;
+  font-size: 1.15em;
+  line-height: 1.6;
+}
+
+.thank-you-container p:last-of-type {
+  margin-top: 32px;
+  margin-bottom: 32px;
+  font-weight: 500;
+  color: #0097a7;
+  font-size: 1em;
+  opacity: 0.7;
+}
+
+.gift-box-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 0 auto;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  transition: transform 0.2s;
+}
+
+.gift-box-container:hover {
+  transform: scale(1.04) translateY(-4px);
+}
+
+.gift-image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  margin: auto;
+}
+
+.go-to-gifts-button {
+  display: none;
+}
+
+/* Удаляем предыдущие стили для лент и стилизованного подарка */
+.gift-lid,
+.gift-ribbon-vertical,
+.stylized-gift {
+  display: none;
+}
+
+/* Здесь будут @keyframes для анимации */
+/* Если захотите добавить анимацию к изображению, можно сделать это здесь */ 
