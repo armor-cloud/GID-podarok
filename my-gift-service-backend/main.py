@@ -9,6 +9,8 @@ from starlette.responses import JSONResponse
 from sqlalchemy.orm import Session
 from models import Gift as GiftModel
 from database import SessionLocal, engine, Base
+import schemas
+import models
 
 app = FastAPI()
 
@@ -113,4 +115,84 @@ def init_gifts():
     db.close()
 
 init_gifts()
-# --- конец автоинициализации --- 
+# --- конец автоинициализации ---
+
+# Task endpoints
+@app.get("/tasks/", response_model=List[schemas.Task])
+def get_tasks(db: Session = Depends(get_db)):
+    tasks = db.query(models.Task).all()
+    return [schemas.Task.from_orm(task) for task in tasks]
+
+@app.get("/tasks/visible/", response_model=List[schemas.Task])
+def get_visible_tasks(db: Session = Depends(get_db)):
+    tasks = db.query(models.Task).filter(models.Task.is_visible == True).all()
+    return [schemas.Task.from_orm(task) for task in tasks]
+
+@app.post("/tasks/", response_model=schemas.Task)
+def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
+    db_task = models.Task(**task.dict())
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return db_task
+
+@app.put("/tasks/{task_id}", response_model=schemas.Task)
+def update_task(task_id: int, task: schemas.TaskUpdate, db: Session = Depends(get_db)):
+    db_task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    for key, value in task.dict(exclude_unset=True).items():
+        setattr(db_task, key, value)
+    
+    db.commit()
+    db.refresh(db_task)
+    return db_task
+
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    db_task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    db.delete(db_task)
+    db.commit()
+    return {"message": "Task deleted successfully"}
+
+def init_tasks():
+    from models import Task as TaskModel
+    db = SessionLocal()
+    if db.query(TaskModel).count() == 0:
+        mock_tasks = [
+            {
+                "title": "Зарегистрируйся на GID.ru",
+                "description": "Создай аккаунт на GID.ru и получи первые баллы!",
+                "points": 100,
+                "is_visible": True
+            },
+            {
+                "title": "Заполни профиль",
+                "description": "Добавь свои данные в личном кабинете GID.ru.",
+                "points": 50,
+                "is_visible": True
+            },
+            {
+                "title": "Подпишись на Telegram-канал",
+                "description": "Подпишись на наш Telegram-канал и будь в курсе акций.",
+                "points": 30,
+                "is_visible": True
+            },
+            {
+                "title": "Соверши первую покупку",
+                "description": "Соверши любую покупку через GID.ru и получи бонусные баллы.",
+                "points": 200,
+                "is_visible": True
+            },
+        ]
+        for task in mock_tasks:
+            db_task = TaskModel(**task)
+            db.add(db_task)
+        db.commit()
+    db.close()
+
+init_tasks() 
