@@ -9,6 +9,7 @@ export interface GiftCardProps {
   description: string; // Описание подарка (теперь часть текста)
   points: string; // **ДОБАВЛЕНО** Поле для баллов
   isHighlighted?: boolean; // Метка ХИТ
+  isHit?: boolean;
   isSelected?: boolean; // Выбранная карточка (для подсветки)
   isClaimed?: boolean; // Активированный подарок
   onClick: (id: number) => void; // Обработчик клика
@@ -16,7 +17,7 @@ export interface GiftCardProps {
   className?: string; // Добавляем опциональное свойство className
 }
 
-const GiftCard: React.FC<GiftCardProps> = ({ id, logo, title, description, points, isHighlighted, isSelected, isClaimed, onClick, disabled, className }) => {
+const GiftCard: React.FC<GiftCardProps> = ({ id, logo, title, description, points, isHighlighted, isHit, isSelected, isClaimed, onClick, disabled, className }) => {
   const handleClick = () => {
     if (!disabled) {
       onClick(id);
@@ -25,26 +26,20 @@ const GiftCard: React.FC<GiftCardProps> = ({ id, logo, title, description, point
 
   return (
     <div 
-      className={`gift-card ${isHighlighted ? 'highlighted' : ''} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''} ${className || ''}`}
-      onClick={handleClick} // Используем локальный обработчик клика
+      className={`gift-card ${isHit ? 'highlighted' : ''} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''} ${className || ''}`}
+      onClick={handleClick}
     >
       {/* Метка ХИТ, если есть */}
-      {isHighlighted && <span className="highlight-label">ХИТ</span>}
-      
+      {isHit && <span className="highlight-label">ХИТ</span>}
       {/* Контейнер для логотипа (картинка сверху) */}
       <div className="gift-card-image">
         <img src={logo} alt={`${title} logo`} />
       </div>
-
-      {/* Контейнер для текста (заголовок и описание под картинкой) */}
       <div className="gift-card-text-content">
-        <h3>{title}</h3> {/* Заголовок */}
-        <p>{description}</p> {/* Описание */}
-        <p className="gift-points">{points}</p> {/* **ДОБАВЛЕНО** Отображение баллов */}
+        <h3>{title}</h3>
+        <p>{description}</p>
+        <p className="gift-points">{points}</p>
       </div>
-      
-      {/* Удаляем отдельный блок для иконки подарка справа */}
-      
     </div>
   );
 };

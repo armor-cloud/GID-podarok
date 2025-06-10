@@ -17,6 +17,7 @@ interface Gift {
   isHighlighted: boolean;
   isClaimed: boolean;
   redirect_url?: string; // Добавляем опциональное поле для URL редиректа
+  isHit: boolean;
 }
 
 // Определяем тип для GiftCardProps, включая points
@@ -31,6 +32,7 @@ interface GiftCardProps {
   onClick: () => Promise<void>;
   isSelected: boolean;
   className?: string; // Добавляем опциональное свойство className
+  isHit: boolean;
 }
 
 // Определяем тип для GiftDetailsPopupProps, включая onClaim
@@ -130,7 +132,7 @@ const GiftPage: React.FC = () => {
       try {
         setLoading(true);
         setFetchError(null);
-        const response = await fetch(`http://127.0.0.1:8000/gifts`, {
+        const response = await fetch(`http://127.0.0.1:8000/gifts?only_highlighted=true`, {
           credentials: 'include'
         });
         
@@ -141,20 +143,14 @@ const GiftPage: React.FC = () => {
 
         const data = await response.json();
         console.log("Received gifts data:", data);
-        setCurrentUserId(data.user_id);
-        
-        if (data.gifts.length === 0) {
+        if (data.length === 0) {
           setShowGiftSection(false);
         } else {
-          // Преобразуем данные с бэкенда, добавляя моковые значения для illustration и points
-          const giftsWithDetails = data.gifts.map((gift: any) => ({
+          const giftsWithDetails = data.map((gift: any) => ({
             ...gift,
-            // Временные моковые данные для иллюстраций и баллов.
-            // Используем одну и ту же иллюстрацию для всех подарков
             illustration: `/static/illustrations/default_illustration_2.png`,
-            points: `до ${Math.floor(Math.random() * 500) + 100} баллов` 
           }));
-          setGifts(giftsWithDetails); // Обновляем список подарков с дополнительными полями
+          setGifts(giftsWithDetails);
         }
 
       } catch (error) {
@@ -263,7 +259,6 @@ const GiftPage: React.FC = () => {
 
   // Функция для остановки анимации
   const stopAnimation = () => {
-    console.log("LOG: Остановка анимации");
     setIsSpinning(false);
     animationState.current.phase = 'idle';
     animationState.current.velocity = 0;
@@ -275,7 +270,6 @@ const GiftPage: React.FC = () => {
 
   // Функция анимации прокрутки
   const animateScroll = () => {
-    console.log("LOG: Начало animateScroll. Фаза:", animationState.current.phase, "Скорость:", animationState.current.velocity);
     const container = scrollContainerRef.current;
     const content = contentRef.current;
     if (!container || !content) {
@@ -312,7 +306,6 @@ const GiftPage: React.FC = () => {
         break;
 
       case 'spin':
-        console.log("LOG: Фаза spin. Скорость:", currentVelocity);
         container.scrollLeft += currentVelocity;
         if (animationState.current.targetScroll !== null && Math.abs(animationState.current.targetScroll - container.scrollLeft) < decelerationStartDistance) {
           animationState.current.phase = 'decelerate';
@@ -321,12 +314,9 @@ const GiftPage: React.FC = () => {
 
       case 'decelerate':
         const distanceToTarget = animationState.current.targetScroll !== null ? animationState.current.targetScroll - container.scrollLeft : 0;
-        console.log("LOG: Фаза decelerate. Скорость:", currentVelocity, "Дистанция до цели:", distanceToTarget);
 
         // Новая логика замедления: уменьшаем скорость пропорционально расстоянию до цели
         let decelerationAmount = 1; // Минимальное значение уменьшения скорости за кадр для плавного замедления (около 5 секунд с 300 до 0)
-
-        console.log("LOG: Decelerate. Amount:", decelerationAmount);
 
         // Применяем замедление с учетом направления скорости
         if (currentVelocity > 0) {
@@ -336,8 +326,6 @@ const GiftPage: React.FC = () => {
         } else {
             currentVelocity = 0; // Если скорость уже 0, остаемся на месте
         }
-
-        console.log("LOG: Decelerate. New Velocity:", currentVelocity);
 
         // Если скорость стала очень маленькой или достигли цели, останавливаем
         if (animationState.current.targetScroll !== null && Math.abs(currentVelocity) < 10) {
@@ -352,19 +340,16 @@ const GiftPage: React.FC = () => {
 
       case 'idle':
       default:
-        console.log("LOG: Фаза idle. Остановка.");
         stopAnimation();
         return;
     }
 
     // Продолжаем анимацию
-    console.log("LOG: Запрос следующего кадра анимации");
     animationFrameId.current = requestAnimationFrame(animateScroll);
   };
 
   // Функция для запуска вращения
   const handleSpin = () => {
-    console.log("LOG: Начало handleSpin");
     if (isSpinning || gifts.length === 0) return;
     
     animationState.current.velocity = 0;
@@ -421,6 +406,7 @@ const GiftPage: React.FC = () => {
                   description={gift.description}
                   points={gift.points}
                   isHighlighted={gift.isHighlighted}
+                  isHit={gift.isHit}
                   isClaimed={gift.isClaimed}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
@@ -437,6 +423,7 @@ const GiftPage: React.FC = () => {
                   description={gift.description}
                   points={gift.points}
                   isHighlighted={gift.isHighlighted}
+                  isHit={gift.isHit}
                   isClaimed={gift.isClaimed}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
@@ -452,6 +439,7 @@ const GiftPage: React.FC = () => {
                   description={gift.description}
                   points={gift.points}
                   isHighlighted={gift.isHighlighted}
+                  isHit={gift.isHit}
                   isClaimed={gift.isClaimed}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
@@ -464,7 +452,8 @@ const GiftPage: React.FC = () => {
           <button
             className="spin-button"
             onClick={handleSpin}
-            disabled={isSpinning || gifts.length === 0} // Отключаем кнопку во время вращения или если нет подарков
+            disabled={isSpinning || gifts.length === 0}
+            style={{ color: '#fff' }}
           >
             {isSpinning ? 'Крутим...' : 'Крутить колесо'}
           </button>
@@ -550,7 +539,6 @@ const GiftPage: React.FC = () => {
           onClose={closeDetailsPopup}
           onClaim={async () => { 
             // Здесь будет логика активации подарка
-            console.log("Claiming gift:", selectedGiftDetails.id);
           }}
         />
       )}

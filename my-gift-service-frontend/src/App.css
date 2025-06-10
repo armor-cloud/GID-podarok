@@ -364,3 +364,11 @@ h1 {
     font-size: 0.8em; /* Уменьшаем шрифт описания */
   }
 }
+
+.spin-button {
+  color: #fff !important;
+}
+.spin-button:disabled {
+  color: #fff !important;
+  opacity: 0.7;
+}

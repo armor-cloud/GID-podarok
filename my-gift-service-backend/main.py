@@ -1,18 +1,21 @@
-from fastapi import FastAPI, HTTPException, Cookie
+from fastapi import FastAPI, HTTPException, Depends, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import List, Optional
 import uuid
 import os
 from starlette.responses import JSONResponse
+from sqlalchemy.orm import Session
+from models import Gift as GiftModel
+from database import SessionLocal, engine, Base
 
 app = FastAPI()
 
 # Настройка CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # URL фронтенда
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,131 +25,92 @@ app.add_middleware(
 os.makedirs("static/logos", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Модель данных для подарка
-class Gift(BaseModel):
-    id: int
+# Создаём таблицы
+Base.metadata.create_all(bind=engine)
+
+# Pydantic-схемы
+class GiftBase(BaseModel):
     logo: str
     title: str
     description: str
     isHighlighted: bool = False
     isClaimed: bool = False
+    isHit: bool = False
     redirect_url: Optional[str] = None
 
-# Моковые данные подарков
-mock_gifts = [
-    {
-        "id": 1,
-        "logo": "/static/logos/gazprombonus.png",
-        "title": "Газпром Бонус",
-        "description": "800 баллов Плюса за открытие карты ГПБ",
-        "isHighlighted": False,
-        "isClaimed": False,
-        "redirect_url": "https://gazprombonus.ru/activate"
-    },
-    {
-        "id": 2,
-        "logo": "/static/logos/gid.png",
-        "title": "Скидка на Заправках",
-        "description": "Скидка 5₽ с литра с картой ГПБ",
-        "isHighlighted": True,
-        "isClaimed": False,
-        "redirect_url": "https://gid.ru/fuel"
-    },
-    {
-        "id": 3,
-        "logo": "/static/logos/gid.png",
-        "title": "GID Путешествия",
-        "description": "До 10% кешбэка рублями в GID Путешествиях",
-        "isHighlighted": False,
-        "isClaimed": False,
-        "redirect_url": "https://gid.ru/travel"
-    },
-    {
-        "id": 4,
-        "logo": "/static/logos/premier.png",
-        "title": "PREMIER",
-        "description": "Месяц бесплатной подписки на онлайн-кинотеатр",
-        "isHighlighted": False,
-        "isClaimed": False,
-        "redirect_url": "https://premier.one/activate"
-    },
-    {
-        "id": 5,
-        "logo": "/static/logos/rutube.png",
-        "title": "RUTUBE",
-        "description": "Эксклюзивный контент и бонусы для подписчиков",
-        "isHighlighted": False,
-        "isClaimed": False,
-        "redirect_url": "https://rutube.ru/activate"
-    },
-    {
-        "id": 6,
-        "logo": "/static/logos/gazprombank.png",
-        "title": "Газпромбанк",
-        "description": "Специальные условия по дебетовой карте",
-        "isHighlighted": False,
-        "isClaimed": False,
-        "redirect_url": "https://gazprombank.ru/card"
-    },
-]
+class GiftCreate(GiftBase):
+    pass
 
-# Хранилище активированных подарков (в реальном приложении это будет база данных)
-claimed_gifts: Dict[str, List[int]] = {}
+class GiftUpdate(GiftBase):
+    pass
+
+class GiftOut(GiftBase):
+    id: int
+    class Config:
+        orm_mode = True
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Gift Service Backend!"}
 
-@app.get("/gifts")
-def get_gifts(user_id: Optional[str] = Cookie(None)):
-    # Если пользователь не идентифицирован, создаем новый ID
-    if not user_id:
-        user_id = str(uuid.uuid4())
-    
-    # Получаем список активированных подарков для пользователя
-    user_claimed_gifts = claimed_gifts.get(user_id, [])
-    
-    # Если у пользователя уже есть активированный подарок, возвращаем пустой список
-    if user_claimed_gifts:
-        response_data = {"user_id": user_id, "gifts": []}
-        response = JSONResponse(content=response_data)
-        response.set_cookie(key="user_id", value=user_id, httponly=True, samesite="lax")
-        return response
-    
-    # Копируем подарки и отмечаем активированные
-    gifts = []
-    for gift in mock_gifts:
-        gift_copy = gift.copy()
-        gift_copy["isClaimed"] = gift["id"] in user_claimed_gifts
-        gifts.append(gift_copy)
-    
-    response_data = {"user_id": user_id, "gifts": gifts}
-    response = JSONResponse(content=response_data)
-    response.set_cookie(key="user_id", value=user_id, httponly=True, samesite="lax")
-    return response
+@app.get("/gifts", response_model=List[GiftOut])
+def get_gifts(db: Session = Depends(get_db), only_highlighted: bool = False):
+    if only_highlighted:
+        return db.query(GiftModel).filter(GiftModel.isHighlighted == True).all()
+    return db.query(GiftModel).all()
 
-@app.post("/gifts/claim/{gift_id}")
-def claim_gift(gift_id: int, user_id: str = Cookie(None)):
-    if not user_id:
-        raise HTTPException(status_code=401, detail="User not identified")
-    
-    # Проверяем, существует ли такой подарок
-    gift = next((g for g in mock_gifts if g["id"] == gift_id), None)
-    if not gift:
+@app.post("/gifts", response_model=GiftOut)
+def create_gift(gift: GiftCreate, db: Session = Depends(get_db)):
+    db_gift = GiftModel(**gift.dict())
+    db.add(db_gift)
+    db.commit()
+    db.refresh(db_gift)
+    return db_gift
+
+@app.put("/gifts/{gift_id}", response_model=GiftOut)
+def update_gift(gift_id: int, gift: GiftUpdate, db: Session = Depends(get_db)):
+    db_gift = db.query(GiftModel).filter(GiftModel.id == gift_id).first()
+    if not db_gift:
         raise HTTPException(status_code=404, detail="Gift not found")
-    
-    # Проверяем, не активирован ли уже подарок
-    user_claimed_gifts = claimed_gifts.get(user_id, [])
-    if gift_id in user_claimed_gifts:
-        raise HTTPException(status_code=400, detail="Gift already claimed")
-    
-    # Активируем подарок
-    if user_id not in claimed_gifts:
-        claimed_gifts[user_id] = []
-    claimed_gifts[user_id].append(gift_id)
-    
-    # В реальной логике здесь бы происходила интеграция с партнером
-    return {
-        "message": f"Подарок {gift_id} успешно активирован!",
-        "claimed_gift": {**gift, "isClaimed": True}
-    } 
+    for key, value in gift.dict().items():
+        setattr(db_gift, key, value)
+    db.commit()
+    db.refresh(db_gift)
+    return db_gift
+
+@app.delete("/gifts/{gift_id}")
+def delete_gift(gift_id: int, db: Session = Depends(get_db)):
+    db_gift = db.query(GiftModel).filter(GiftModel.id == gift_id).first()
+    if not db_gift:
+        raise HTTPException(status_code=404, detail="Gift not found")
+    db.delete(db_gift)
+    db.commit()
+    return {"ok": True}
+
+# --- Автоинициализация стартовых подарков ---
+def init_gifts():
+    mock_gifts = [
+        {"logo": "/static/logos/gazprombonus.png", "title": "Газпром Бонус", "description": "800 баллов Плюса за открытие карты ГПБ", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gazprombonus.ru/activate"},
+        {"logo": "/static/logos/gid.png", "title": "Скидка на Заправках", "description": "Скидка 5₽ с литра с картой ГПБ", "isHighlighted": True, "isClaimed": False, "redirect_url": "https://gid.ru/fuel"},
+        {"logo": "/static/logos/gid.png", "title": "GID Путешествия", "description": "До 10% кешбэка рублями в GID Путешествиях", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gid.ru/travel"},
+        {"logo": "/static/logos/premier.png", "title": "PREMIER", "description": "Месяц бесплатной подписки на онлайн-кинотеатр", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://premier.one/activate"},
+        {"logo": "/static/logos/rutube.png", "title": "RUTUBE", "description": "Эксклюзивный контент и бонусы для подписчиков", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://rutube.ru/activate"},
+        {"logo": "/static/logos/gazprombank.png", "title": "Газпромбанк", "description": "Специальные условия по дебетовой карте", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gazprombank.ru/card"},
+    ]
+    db = SessionLocal()
+    if db.query(GiftModel).count() == 0:
+        for gift in mock_gifts:
+            db_gift = GiftModel(**gift)
+            db.add(db_gift)
+        db.commit()
+    db.close()
+
+init_gifts()
+# --- конец автоинициализации --- 
