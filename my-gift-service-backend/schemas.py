@@ -29,4 +29,16 @@ class Task(TaskBase):
     updated_at: datetime
 
     class Config:
+        orm_mode = True
+
+class SettingsBase(BaseModel):
+    logo_url: Optional[str] = None
+    offer_text: Optional[str] = None
+
+class SettingsUpdate(SettingsBase):
+    pass
+
+class SettingsOut(SettingsBase):
+    id: int
+    class Config:
         orm_mode = True 

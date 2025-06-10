@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Cookie
+from fastapi import FastAPI, HTTPException, Depends, Cookie, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -7,7 +7,7 @@ import uuid
 import os
 from starlette.responses import JSONResponse
 from sqlalchemy.orm import Session
-from models import Gift as GiftModel
+from models import Gift as GiftModel, Settings as SettingsModel
 from database import SessionLocal, engine, Base
 import schemas
 import models
@@ -195,4 +195,58 @@ def init_tasks():
         db.commit()
     db.close()
 
-init_tasks() 
+init_tasks()
+
+# --- Автоинициализация настроек ---
+def init_settings():
+    db = SessionLocal()
+    if db.query(SettingsModel).count() == 0:
+        default_settings = SettingsModel(
+            logo_url="/static/logos/default_logo.png",
+            offer_text="<h2>Пользовательская оферта</h2><p>Текст оферты по умолчанию.</p>"
+        )
+        db.add(default_settings)
+        db.commit()
+    db.close()
+
+init_settings()
+# --- конец автоинициализации ---
+
+@app.get("/settings", response_model=schemas.SettingsOut)
+@app.get("/api/settings", response_model=schemas.SettingsOut)
+def get_settings(db: Session = Depends(get_db)):
+    settings = db.query(SettingsModel).first()
+    if not settings:
+        raise HTTPException(status_code=404, detail="Settings not found")
+    return settings
+
+@app.put("/settings", response_model=schemas.SettingsOut)
+@app.put("/api/settings", response_model=schemas.SettingsOut)
+def update_settings(update: schemas.SettingsUpdate, db: Session = Depends(get_db)):
+    settings = db.query(SettingsModel).first()
+    if not settings:
+        raise HTTPException(status_code=404, detail="Settings not found")
+    for key, value in update.dict(exclude_unset=True).items():
+        setattr(settings, key, value)
+    db.commit()
+    db.refresh(settings)
+    return settings
+
+@app.post("/api/upload_logo")
+async def upload_logo(file: UploadFile = File(...)):
+    # Проверяем расширение
+    allowed_ext = {"png", "jpg", "jpeg", "webp", "gif"}
+    filename = file.filename
+    ext = filename.split(".")[-1].lower()
+    if ext not in allowed_ext:
+        raise HTTPException(status_code=400, detail="Недопустимый формат файла")
+    # Генерируем уникальное имя
+    unique_name = f"{uuid.uuid4().hex}.{ext}"
+    save_path = os.path.join("static", "logos", unique_name)
+    # Сохраняем файл
+    with open(save_path, "wb") as f:
+        content = await file.read()
+        f.write(content)
+    # Возвращаем путь для фронта
+    logo_url = f"/static/logos/{unique_name}"
+    return {"logo_url": logo_url} 

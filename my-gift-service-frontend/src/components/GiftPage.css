@@ -135,10 +135,12 @@ body {
 
 
 /* Actual Gift Card Styles */
+/* --- Удаляем или комментируем конфликтующие стили карточек подарков --- */
+/*
 .gift-card {
-    background-color: #ffffff; /* White card background */
+    background-color: #ffffff;
     border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -150,12 +152,23 @@ body {
     border: 1px solid rgba(71, 85, 105, 0.3);
     position: relative;
 }
-
 .gift-card img {
     max-width: 90%;
     height: auto;
     margin-bottom: 15px;
 }
+.gift-card.selected {
+  border-color: #6a5acd;
+  box-shadow: 0 0 20px rgba(106, 90, 205, 0.5);
+  background-color: rgba(106, 90, 205, 0.1);
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+.gift-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+*/
 
 .gift-card h3 {
     font-size: 1em;
@@ -186,10 +199,12 @@ body {
 
 
 /* Selected Card Style */
+/* --- Удаляем или комментируем конфликтующие стили карточек подарков --- */
+/*
 .gift-card.selected {
-  border-color: #6a5acd; /* Medium purple border */
-  box-shadow: 0 0 20px rgba(106, 90, 205, 0.5); /* Purple glow effect */
-  background-color: rgba(106, 90, 205, 0.1); /* Light purple accent background */
+  border-color: #6a5acd;
+  box-shadow: 0 0 20px rgba(106, 90, 205, 0.5);
+  background-color: rgba(106, 90, 205, 0.1);
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
@@ -198,14 +213,18 @@ body {
   50% { box-shadow: 0 0 30px rgba(106, 90, 205, 0.8); }
   100% { box-shadow: 0 0 20px rgba(106, 90, 205, 0.5); }
 }
+*/
 
 
 /* Disabled Card Style */
+/* --- Удаляем или комментируем конфликтующие стили карточек подарков --- */
+/*
 .gift-card.disabled {
   opacity: 0.6;
   cursor: not-allowed;
   filter: grayscale(0.5);
 }
+*/
 
 
 /* Spin Button */

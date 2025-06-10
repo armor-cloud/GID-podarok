@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
 from database import Base
 from datetime import datetime
 
@@ -25,4 +25,10 @@ class Task(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     expires_at = Column(DateTime, nullable=True)
-    details = Column(String, nullable=True) 
+    details = Column(String, nullable=True)
+
+class Settings(Base):
+    __tablename__ = 'settings'
+    id = Column(Integer, primary_key=True, index=True)
+    logo_url = Column(String, nullable=True)  # Путь к логотипу
+    offer_text = Column(Text, nullable=True)  # Текст оферты (можно html) 

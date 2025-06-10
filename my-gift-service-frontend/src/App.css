@@ -203,33 +203,46 @@ h1 {
   animation: spin 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Стили для карточек в ленте */
+/* --- Удаляем или комментируем конфликтующие стили карточек подарков --- */
+/*
 .gift-card {
   width: 100%;
-  min-width: 280px; /* Минимальная ширина карточки (примерно как в примере) */
-  max-width: 350px; /* Максимальная ширина */
-  height: 100px; /* Фиксированная высота карточки */
+  min-width: 280px;
+  max-width: 350px;
+  height: 100px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
-  padding: 10px; /* Внутренний отступ для контента */
+  padding: 10px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-sizing: border-box; /* Учитываем padding в ширине */
-  flex-shrink: 0; /* Не сжимать карточки */
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
-
 .gift-card:hover {
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-
 .gift-card.selected {
   transform: scale(1.05);
   box-shadow: 0 0 20px rgba(0, 112, 210, 0.5);
   border: 2px solid #0070d2;
 }
+.gift-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.gift-card.highlighted {
+  border-color: #ff8c00;
+}
+.gift-card-logo img {
+  width: 40px;
+  height: 40px;
+  margin-right: 15px;
+  object-fit: contain;
+}
+*/
 
 /* Обертка для контейнера скролла и стрелок - скрываем или удаляем */
 .scroll-container-wrapper {
@@ -269,10 +282,10 @@ h1 {
 }
 
 .gift-card-logo img {
-  width: 40px;
-  height: 40px;
-  margin-right: 15px;
-  object-fit: contain;
+  /* width: 40px; */
+  /* height: 40px; */
+  /* margin-right: 15px; */
+  /* object-fit: contain; */
 }
 
 .gift-card-info {
@@ -371,4 +384,32 @@ h1 {
 .spin-button:disabled {
   color: #fff !important;
   opacity: 0.7;
+}
+
+.fixed-logo-company {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  z-index: 1000;
+  max-width: 16vw;
+  max-height: 16vw;
+}
+
+@media (max-width: 600px) {
+  .fixed-logo-company {
+    top: 6px;
+    right: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    max-width: 18vw;
+    max-height: 18vw;
+  }
 }

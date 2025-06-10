@@ -6,6 +6,9 @@ import '../App.css'; // Импортируем стили
 import './GiftPage.css'; // Удаляем импорт удаленного файла стилей
 // Импортируем только сам компонент, не его тип.
 import GiftDetailsPopup from './GiftDetailsPopup'; // Импортируем новый компонент попапа
+import { taskService } from '../api/taskService';
+import type { Task } from '../api/taskService';
+import axios from 'axios';
 
 interface Gift {
   id: number;
@@ -93,6 +96,13 @@ const GiftPage: React.FC = () => {
     targetScroll: null as number | null,
     phase: 'idle' as 'idle' | 'accelerate' | 'spin' | 'decelerate',
   });
+
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [showTasks, setShowTasks] = useState(true);
+
+  // --- Новое: состояния для логотипа и оферты ---
+  const [settings, setSettings] = useState<{logo_url: string, offer_text: string} | null>(null);
+  const [showOfferModal, setShowOfferModal] = useState(false);
 
   // Обработчик ручной прокрутки
   const handleScroll = () => {
@@ -364,8 +374,91 @@ const GiftPage: React.FC = () => {
     animationFrameId.current = requestAnimationFrame(animateScroll);
   };
 
+  // Загрузка видимых заданий
+  useEffect(() => {
+    const fetchVisibleTasks = async () => {
+      try {
+        const visibleTasks = await taskService.getVisibleTasks();
+        setTasks(visibleTasks);
+        setShowTasks(visibleTasks.length > 0);
+      } catch (error) {
+        console.error("Ошибка загрузки заданий:", error);
+        setShowTasks(false);
+      }
+    };
+
+    fetchVisibleTasks();
+  }, []);
+
+  function getTaskTimeLeft(expires_at?: string | null) {
+    if (!expires_at) return '';
+    const now = new Date();
+    const expires = new Date(expires_at);
+    const diff = expires.getTime() - now.getTime();
+    if (diff <= 0) return 'Завершено';
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    if (days > 0) return `Ещё ${days} дн.`;
+    if (hours > 0) return `Ещё ${hours} ч.`;
+    if (minutes > 0) return `Ещё ${minutes} мин.`;
+    return 'Меньше минуты';
+  }
+
+  function renderDetailsWithLinks(details: string) {
+    if (!details) return null;
+    // Регулярка для поиска ссылок
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = details.split(urlRegex);
+    return parts.map((part, i) => {
+      if (urlRegex.test(part)) {
+        return <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{color: '#1976d2', textDecoration: 'underline'}}>{part}</a>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  }
+
+  useEffect(() => {
+    // Получаем настройки (логотип и оферта)
+    axios.get('/api/settings').then(res => {
+      setSettings({
+        logo_url: res.data.logo_url,
+        offer_text: res.data.offer_text,
+      });
+    });
+  }, []);
+
+  // Получаем текущий год для футера
+  const currentYear = new Date().getFullYear();
+
   return (
-    <div className="gift-page-container">
+    <div className="gift-page-container" style={{position: 'relative', minHeight: '100vh', paddingBottom: 0}}>
+      {/* --- Логотип в правом верхнем углу --- */}
+      {settings && settings.logo_url && (
+        <img 
+          src={settings.logo_url} 
+          alt="Логотип компании" 
+          style={{
+            position: 'fixed', 
+            top: 12, 
+            right: 12, 
+            width: 48, 
+            height: 48, 
+            objectFit: 'contain', 
+            borderRadius: 12, 
+            background: 'none', 
+            border: 'none', 
+            boxShadow: 'none', 
+            zIndex: 1000,
+            // Адаптивность для мобильных
+            maxWidth: '16vw',
+            maxHeight: '16vw',
+          }} 
+          className="fixed-logo-company"
+        />
+      )}
+
+      {/* --- Основной контент GiftPage --- */}
       {/* Новый контейнер для иконки подарка и таймера (оставляем как есть) */}
       <div className="top-info-section">
         {/* Изображение подарка над таймером */}
@@ -475,62 +568,36 @@ const GiftPage: React.FC = () => {
       )}
 
       {/* === Блок с заданиями === */}
-      <div className="tasks-section">
-        <h2>Выполняйте задания</h2>
-        {/* <p className="tasks-subtitle">Следите за прогрессом и получайте награды</p> */}
-        {/* Подзаголовок пока закомментирован, т.к. нет стилей для него */}
-        <div className="tasks-list">
-          {/* Здесь будут карточки заданий */}
-          {/* Пример карточки задания (будет стилизовано в CSS) */}
-          {/* Используем моковые данные для демонстрации структуры */}
-          {[ /* Моковый массив заданий */
-            { id: 1, source: 'Rutube', progress: '0%', title: 'Подпишись на 5 блогеров в Rutube', linkText: 'Найти блогеров →', reward: '⚡️ 10 баллов', time: '🕗 Ещё 7 дней', logo: '/path/to/rutube-logo.png', additionalText: 'Подпишитесь на каналы, которые вам интересны, и следите за новыми видео!' },
-            { id: 2, source: 'Музыка', progress: '50%', title: 'Послушай плейлист недели', linkText: 'Слушать →', reward: '💖 50 баллов', time: '🕗 Ещё 5 дней', logo: '/path/to/music-logo.png', additionalText: 'Откройте для себя новые треки и артистов в нашем специальном плейлисте.' },
-            { id: 3, source: 'Кино', progress: '100%', title: 'Оцени 3 фильма или сериала', linkText: 'Оценить →', reward: '⚡️ 20 баллов', time: '✅ Выполнено', logo: '/path/to/cinema-logo.png', additionalText: 'Ваше мнение помогает другим выбрать что посмотреть!' },
-             { id: 4, source: 'Новости', progress: '0%', title: 'Прочитай 5 новостей дня', linkText: 'Читать →', reward: '💖 5 баллов', time: '🕗 Ещё 1 день', logo: '/path/to/news-logo.png', additionalText: 'Будьте в курсе последних событий.' },
-             { id: 5, source: 'Дзен', progress: '30%', title: 'Поставь 10 лайков статьям в Дзен', linkText: 'Открыть Дзен →', reward: '⚡️ 15 баллов', time: '🕗 Ещё 3 дня', logo: '/path/to/dzen-logo.png', additionalText: 'Поддержите любимых авторов и помогите хорошим статьям подняться в ленте.' },
-             { id: 6, source: 'Игры', progress: '0%', title: 'Сыграй в новую мини-игру', linkText: 'Играть →', reward: '💖 100 баллов и бонус' , time: '🕗 Ещё 10 дней', logo: '/path/to/games-logo.png', additionalText: 'Попробуйте новую увлекательную мини-игру и получите дополнительные бонусы.' },
-          ].map(task => (
-            <div key={task.id} className="task-card">
-              <div className="task-main-info">
-                 {/* Логотип источника */}
-                {/* <img src={task.logo} alt={task.source} className="task-source-logo" /> */}
-                <span className="task-source">{task.source}</span>
-                <span className="task-progress">{task.progress}</span>
-              </div>
-              <h3 className="task-title">{task.title}</h3>
-              <p className="task-link">{task.linkText}</p>
-
-              {/* Секция деталей - сворачиваемая */}
-              <div className={`task-details-section ${expandedTaskIds.has(task.id) ? 'expanded' : 'collapsed'}`}>
-                <div className="task-details-content">
-                   {/* Дополнительный текст */}
-                   <p className="task-additional-text">{task.additionalText}</p>
-                   {/* Пример дополнительной награды (если есть) */}
-                   {/* task.additionalRewardText && <p className="task-additional-reward">{task.additionalRewardText}</p> */}
-
-                   <span className="task-reward">Награда: {task.reward}</span>
-                   {/* Убираем время отсюда */}
-                   {/* <span className="task-time">{task.time}</span> */}
+      {showTasks && tasks.length > 0 && (
+        <div className="tasks-section">
+          <h2>Выполняйте задания</h2>
+          <div className="tasks-list">
+            {tasks.map(task => (
+              <div key={task.id} className={`task-card${expandedTaskIds.has(task.id) ? ' expanded' : ''}`}>
+                <div className="task-main-info">
+                  <span className="task-source">{task.title}</span>
+                  <span className="task-progress">{task.is_completed ? '100%' : '0%'}</span>
+                </div>
+                <h3 className="task-title">{task.description}</h3>
+                <p className="task-link" onClick={() => toggleTaskDetails(task.id)}>Выполнить →</p>
+                {expandedTaskIds.has(task.id) && !!task.details && (
+                  <div className="task-details-section">
+                    <div className="task-details-content">
+                      <p className="task-additional-text">{renderDetailsWithLinks(task.details)}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="task-toggle-container" onClick={() => toggleTaskDetails(task.id)}>
+                  <span className="task-time">🕗 {getTaskTimeLeft(task.expires_at)}</span>
+                  <div className="task-arrow-circle">
+                    <div className="task-toggle-arrow">{expandedTaskIds.has(task.id) ? '↑' : '↓'}</div>
+                  </div>
                 </div>
               </div>
-
-              {/* Контейнер для времени и стрелки переключения */}
-              <div className="task-toggle-container">
-                 <span className="task-time">{task.time}</span>
-                 {/* Иконка стрелки для сворачивания/разворачивания в кружке */}
-                 <div className="task-arrow-circle" onClick={() => toggleTaskDetails(task.id)}>
-                    <div className="task-toggle-arrow">
-                       {/* Иконка стрелки вниз */}
-                       ↓
-                    </div>
-                 </div>
-              </div>
-
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Попап деталей подарка */}
       {showDetailsPopup && selectedGiftDetails && (
@@ -550,6 +617,26 @@ const GiftPage: React.FC = () => {
             <h3>Поздравляем!</h3>
             <p>{successPopupMessage}</p>
             <button onClick={closeSuccessPopup}>Закрыть</button>
+          </div>
+        </div>
+      )}
+
+      {/* --- Минималистичный футер (без подложки) --- */}
+      <footer style={{width: '100%', background: 'none', borderTop: '1px solid #e3eaf5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px 8px 8px', marginTop: 48}}>
+        <div style={{marginBottom: 4}}>
+          <button onClick={() => setShowOfferModal(true)} style={{background: 'none', border: 'none', color: '#1976d2', fontWeight: 700, fontSize: '1em', cursor: 'pointer', textDecoration: 'underline', padding: 0}}>Пользовательская оферта</button>
+        </div>
+        <div style={{fontSize: '0.95em', color: '#888', fontWeight: 500}}>
+          Powered by <span style={{fontWeight: 900, color: '#1976d2'}}>DataNova</span> © {currentYear}
+        </div>
+      </footer>
+
+      {/* --- Минималистичная модалка оферты --- */}
+      {showOfferModal && settings && (
+        <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(33,50,80,0.13)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <div style={{background: '#fff', borderRadius: 16, boxShadow: '0 8px 32px rgba(33,150,243,0.10)', padding: 32, maxWidth: 420, width: '92%', position: 'relative', minHeight: 120}}>
+            <button onClick={() => setShowOfferModal(false)} style={{position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 22, color: '#1976d2', cursor: 'pointer', fontWeight: 900, lineHeight: 1}} aria-label="Закрыть оферту">×</button>
+            <div style={{fontSize: '1em', color: '#222', fontWeight: 400, lineHeight: 1.6, textAlign: 'left'}} dangerouslySetInnerHTML={{__html: settings.offer_text || ''}} />
           </div>
         </div>
       )}

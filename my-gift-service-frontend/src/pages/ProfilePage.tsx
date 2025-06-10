@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import './ProfilePage.css';
 import { getGifts, deleteGift, createGift, updateGift } from '../api/giftService';
 import type { Gift, GiftInput } from '../api/giftService';
+import { taskService } from '../api/taskService';
+import type { Task } from '../api/taskService';
+import SettingsPanel from '../components/SettingsPanel';
 
 const initialGiftForm: GiftInput = {
   logo: '',
@@ -15,6 +18,7 @@ const initialGiftForm: GiftInput = {
 
 const ProfilePage: React.FC = () => {
   const [gifts, setGifts] = useState<Gift[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -23,6 +27,16 @@ const ProfilePage: React.FC = () => {
   const [formGift, setFormGift] = useState<GiftInput>(initialGiftForm);
   const [editId, setEditId] = useState<number | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    points: 0,
+    is_visible: true,
+    expires_at: '',
+    details: ''
+  });
 
   const fetchGiftsList = async () => {
     try {
@@ -147,8 +161,86 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const fetchTasks = async () => {
+    try {
+      const tasksData = await taskService.getAllTasks();
+      setTasks(tasksData);
+    } catch (err) {
+      setError('Ошибка при загрузке заданий');
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const handleCreateTask = async () => {
+    try {
+      const createdTask = await taskService.createTask({
+        ...newTask,
+        expires_at: newTask.expires_at ? new Date(newTask.expires_at).toISOString() : null,
+        details: newTask.details || ''
+      });
+      setTasks([...tasks, createdTask]);
+      setShowTaskModal(false);
+      setNewTask({
+        title: '',
+        description: '',
+        points: 0,
+        is_visible: true,
+        expires_at: '',
+        details: ''
+      });
+    } catch (err) {
+      setError('Ошибка при создании задания');
+      console.error(err);
+    }
+  };
+
+  const handleUpdateTask = async (task: Task) => {
+    try {
+      const updatedTask = await taskService.updateTask(task.id, {
+        title: task.title,
+        description: task.description,
+        points: task.points,
+        is_visible: task.is_visible,
+        expires_at: task.expires_at ? new Date(task.expires_at).toISOString() : null,
+        details: task.details || ''
+      });
+      setTasks(tasks.map(t => t.id === task.id ? updatedTask : t));
+      setEditingTask(null);
+    } catch (err) {
+      setError('Ошибка при обновлении задания');
+      console.error(err);
+    }
+  };
+
+  const handleDeleteTask = async (id: number) => {
+    try {
+      await taskService.deleteTask(id);
+      setTasks(tasks.filter(t => t.id !== id));
+    } catch (err) {
+      setError('Ошибка при удалении задания');
+      console.error(err);
+    }
+  };
+
+  const toggleTaskVisibility = async (task: Task) => {
+    try {
+      const updatedTask = await taskService.updateTask(task.id, {
+        is_visible: !task.is_visible
+      });
+      setTasks(tasks.map(t => t.id === task.id ? updatedTask : t));
+    } catch (err) {
+      setError('Ошибка при обновлении видимости задания');
+      console.error(err);
+    }
+  };
+
   return (
     <div className="profile-page-container">
+      <SettingsPanel />
       <h1>Личный кабинет</h1>
       <section className="profile-section gifts-section">
         <h2>Мои подарки</h2>
@@ -230,9 +322,133 @@ const ProfilePage: React.FC = () => {
         )}
       </section>
       <section className="profile-section tasks-section">
-        <h2>Мои задания</h2>
-        <div className="profile-placeholder">Здесь будут отображаться ваши задания.</div>
+        <div className="section-header">
+          <h2>Управление заданиями</h2>
+          <button 
+            className="add-button"
+            onClick={() => setShowTaskModal(true)}
+          >
+            Добавить задание
+          </button>
+        </div>
+
+        <div className="tasks-list">
+          {tasks.map(task => (
+            <div key={task.id} className="task-card">
+              <div className="task-header">
+                <h3>{task.title}</h3>
+                <div className="task-actions">
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={task.is_visible}
+                      onChange={() => toggleTaskVisibility(task)}
+                    />
+                    <span className="slider round"></span>
+                  </label>
+                  <button
+                    className="edit-button"
+                    onClick={() => setEditingTask(task)}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDeleteTask(task.id)}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+              <p>{task.description}</p>
+              <p className="points">Баллы: {task.points}</p>
+              {task.expires_at && (
+                <div className="task-expiry">Срок действия: {task.expires_at.slice(0, 10)}</div>
+              )}
+              {task.details && (
+                <div className="task-details-preview">{task.details}</div>
+              )}
+            </div>
+          ))}
+        </div>
       </section>
+
+      {showTaskModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Новое задание</h3>
+            <input
+              type="text"
+              placeholder="Название"
+              value={newTask.title}
+              onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+            />
+            <textarea
+              placeholder="Описание"
+              value={newTask.description}
+              onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+            />
+            <input
+              type="number"
+              placeholder="Баллы"
+              value={newTask.points}
+              onChange={(e) => setNewTask({...newTask, points: parseInt(e.target.value)})}
+            />
+            <input
+              type="date"
+              value={newTask.expires_at ? newTask.expires_at.slice(0, 10) : ''}
+              onChange={e => setNewTask({ ...newTask, expires_at: e.target.value })}
+              placeholder="Срок действия"
+            />
+            <textarea
+              placeholder="Подробности"
+              value={newTask.details}
+              onChange={e => setNewTask({ ...newTask, details: e.target.value })}
+            />
+            <div className="modal-actions">
+              <button onClick={handleCreateTask}>Создать</button>
+              <button onClick={() => setShowTaskModal(false)}>Отмена</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingTask && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Редактировать задание</h3>
+            <input
+              type="text"
+              value={editingTask.title}
+              onChange={(e) => setEditingTask({...editingTask, title: e.target.value})}
+            />
+            <textarea
+              value={editingTask.description}
+              onChange={(e) => setEditingTask({...editingTask, description: e.target.value})}
+            />
+            <input
+              type="number"
+              value={editingTask.points}
+              onChange={(e) => setEditingTask({...editingTask, points: parseInt(e.target.value)})}
+            />
+            <input
+              type="date"
+              value={editingTask?.expires_at ? editingTask.expires_at.slice(0, 10) : ''}
+              onChange={e => setEditingTask(editingTask ? { ...editingTask, expires_at: e.target.value } : null)}
+              placeholder="Срок действия"
+            />
+            <textarea
+              placeholder="Подробности"
+              value={editingTask?.details || ''}
+              onChange={e => setEditingTask(editingTask ? { ...editingTask, details: e.target.value } : null)}
+            />
+            <div className="modal-actions">
+              <button onClick={() => handleUpdateTask(editingTask)}>Сохранить</button>
+              <button onClick={() => setEditingTask(null)}>Отмена</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
