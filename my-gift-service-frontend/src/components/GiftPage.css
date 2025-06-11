@@ -32,6 +32,7 @@ body {
   width: 100px;
   height: 100px;
   margin-bottom: 30px;
+  margin-top: 40px;
   filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
   animation: float 3s ease-in-out infinite;
 }
@@ -86,18 +87,30 @@ body {
 
 
 /* Gift List Scroll Container */
+.gift-content {
+  margin-bottom: 0;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  width: 100%;
+  max-width: 950px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .gift-list-scroll-container {
   width: 100%;
+  max-width: 950px;
+  margin-left: auto;
+  margin-right: auto;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
   padding: 30px 0;
-  margin: 0 auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
   position: relative;
-
-  /* Add gradient masks to the sides */
   mask-image: linear-gradient(to right,
     transparent 0%,
     black 10%,
@@ -386,30 +399,54 @@ body {
 
 /* === Стили для блока заданий === */
 .tasks-section {
-  margin-top: 60px; /* Отступ сверху от карусели */
-  text-align: left; /* Выравнивание текста по левому краю */
+  background: #fff !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 32px rgba(33,150,243,0.07) !important;
+  padding: 18px 0 24px 0 !important;
+  max-width: 720px !important;
+  width: 100% !important;
+  margin: 40px auto 0 auto !important;
+  text-align: left;
+  display: block;
 }
 
 .tasks-section h2 {
-  font-size: 1.8rem; /* Размер заголовка */
-  color: #333333; /* Цвет заголовка */
-  margin-bottom: 30px; /* Отступ под заголовком */
-  text-align: center; /* Центрируем заголовок */
+  font-size: 1.8rem;
+  color: #333333;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
 .tasks-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px; /* Slightly reduced gap between cards */
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  align-items: center;
 }
 
 .task-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 16px 20px; /* Adjusted inner padding */
-  border: 1px solid #eeeeee;
-  overflow: hidden;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(33,150,243,0.05);
+  padding: 10px 12px;
+  border: 1px solid #e8ecf3;
+  max-width: 600px;
+  width: 100%;
+  font-size: 0.98em;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-card h3, .task-title {
+  font-size: 1.08em;
+  margin-bottom: 6px;
+}
+
+.task-card p, .task-card .points {
+  font-size: 0.97em;
+  margin: 0 0 4px 0;
 }
 
 .task-main-info {

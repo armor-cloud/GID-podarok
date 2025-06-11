@@ -123,6 +123,7 @@ h1 {
   max-width: none; /* Убираем ограничение по максимальной ширине */
   padding: 0 10px; /* Добавляем небольшой горизонтальный отступ к основному контейнеру */
   box-sizing: border-box; /* Учитываем padding */
+  position: relative; /* Для абсолютного позиционирования логотипа */
 }
 
 .gift-content {
@@ -388,8 +389,8 @@ h1 {
 
 .fixed-logo-company {
   position: fixed;
-  top: 12px;
-  right: 12px;
+  top: 0;
+  right: 0;
   width: 48px;
   height: 48px;
   object-fit: contain;
@@ -404,12 +405,54 @@ h1 {
 
 @media (max-width: 600px) {
   .fixed-logo-company {
-    top: 6px;
-    right: 6px;
+    top: 0;
+    right: 0;
     width: 32px;
     height: 32px;
     border-radius: 8px;
     max-width: 18vw;
     max-height: 18vw;
   }
+}
+
+.offer-close-btn {
+  position: absolute;
+  right: -56px;
+  top: 24px;
+  padding: 10px 22px;
+  background: #f7faff;
+  border: 2px solid #1976d2;
+  border-radius: 12px;
+  font-size: 1.1em;
+  color: #1976d2;
+  cursor: pointer;
+  font-weight: 700;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(33,150,243,0.10);
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.offer-close-btn:hover {
+  background: #e3eaf5;
+  color: #0d47a1;
+  border-color: #0d47a1;
+}
+
+@media (max-width: 600px) {
+  .offer-close-btn {
+    right: 0;
+    top: 8px;
+    width: 90%;
+    left: 5%;
+    margin: 0 auto;
+    display: block;
+    text-align: center;
+    font-size: 1em;
+    padding: 10px 0;
+  }
+}
+
+.logo-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }

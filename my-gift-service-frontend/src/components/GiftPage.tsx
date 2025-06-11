@@ -101,8 +101,30 @@ const GiftPage: React.FC = () => {
   const [showTasks, setShowTasks] = useState(true);
 
   // --- Новое: состояния для логотипа и оферты ---
-  const [settings, setSettings] = useState<{logo_url: string, offer_text: string} | null>(null);
+  const [settings, setSettings] = useState<{logo_url: string, offer_text: string, showTimer: boolean, timerTitle: string, showWheel: boolean, showTasks: boolean, showFooter: boolean} | null>(null);
   const [showOfferModal, setShowOfferModal] = useState(false);
+  const [showLogo, setShowLogo] = useState(true);
+
+  // Скрывать логотип при скролле вниз
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowLogo(window.scrollY <= 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Обработчик закрытия оферты по ESC
+  useEffect(() => {
+    if (!showOfferModal) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowOfferModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [showOfferModal]);
 
   // Обработчик ручной прокрутки
   const handleScroll = () => {
@@ -419,17 +441,31 @@ const GiftPage: React.FC = () => {
   }
 
   useEffect(() => {
-    // Получаем настройки (логотип и оферта)
+    // Получаем настройки (логотип, оферта, настройки страницы подарков)
     axios.get('/api/settings').then(res => {
       setSettings({
         logo_url: res.data.logo_url,
         offer_text: res.data.offer_text,
+        showTimer: res.data.showTimer,
+        timerTitle: res.data.timerTitle,
+        showWheel: res.data.showWheel,
+        showTasks: res.data.showTasks,
+        showFooter: res.data.showFooter
       });
     });
   }, []);
 
   // Получаем текущий год для футера
   const currentYear = new Date().getFullYear();
+
+  // Функция для выбора правильного окончания слова "минута"
+  function getMinuteSuffix(minutes: number) {
+    if (minutes % 10 === 1 && minutes % 100 !== 11) return 'минута';
+    if ([2, 3, 4].includes(minutes % 10) && ![12, 13, 14].includes(minutes % 100)) return 'минуты';
+    return 'минут';
+  }
+
+  const minutes = Math.ceil(timeLeft / 60);
 
   return (
     <div className="gift-page-container" style={{position: 'relative', minHeight: '100vh', paddingBottom: 0}}>
@@ -438,44 +474,30 @@ const GiftPage: React.FC = () => {
         <img 
           src={settings.logo_url} 
           alt="Логотип компании" 
-          style={{
-            position: 'fixed', 
-            top: 12, 
-            right: 12, 
-            width: 48, 
-            height: 48, 
-            objectFit: 'contain', 
-            borderRadius: 12, 
-            background: 'none', 
-            border: 'none', 
-            boxShadow: 'none', 
-            zIndex: 1000,
-            // Адаптивность для мобильных
-            maxWidth: '16vw',
-            maxHeight: '16vw',
-          }} 
-          className="fixed-logo-company"
+          className={`fixed-logo-company${showLogo ? '' : ' logo-hidden'}`}
         />
       )}
 
       {/* --- Основной контент GiftPage --- */}
       {/* Новый контейнер для иконки подарка и таймера (оставляем как есть) */}
-      <div className="top-info-section">
-        {/* Изображение подарка над таймером */}
-        <img 
-          src="/images/gift-icon.png" 
-          alt="Gift Icon" 
-          className="large-gift-icon" // Новый класс для стилизации большой иконки
-        />
-        {/* Контейнер таймера под иконкой */}
-        <div className="timer-container">
-          <div className="timer-box">{formatTime(timeLeft).split(':')[0]}</div>
-          <div className="timer-separator">:</div>
-          <div className="timer-box">{formatTime(timeLeft).split(':')[1]}</div>
+      {settings && settings.showTimer && (
+        <div className="top-info-section">
+          {/* Изображение подарка над таймером */}
+          <img 
+            src="/images/gift-icon.png" 
+            alt="Gift Icon" 
+            className="large-gift-icon" // Новый класс для стилизации большой иконки
+          />
+          {/* Контейнер таймера под иконкой */}
+          <div className="timer-container">
+            <div className="timer-box">{formatTime(timeLeft).split(':')[0]}</div>
+            <div className="timer-separator">:</div>
+            <div className="timer-box">{formatTime(timeLeft).split(':')[1]}</div>
+          </div>
         </div>
-      </div>
+      )}
       
-      <p className="instruction-text">Выберите (1) подарок, у вас есть {Math.ceil(timeLeft / 60)} минут</p>
+      <p className="instruction-text">{`Выберите подарок за ${minutes} ${getMinuteSuffix(minutes)}!`}</p>
       
       {loading ? (
         <div className="loading-container">
@@ -557,7 +579,7 @@ const GiftPage: React.FC = () => {
         </div>
       )}
 
-      {showGiftSection && (
+      {showGiftSection && settings && settings.showWheel && (
         <div className="gift-section">
           {/* Секция с каруселью подарков */}
           {/* Здесь рендерится ваша карусель с подарками */}
@@ -568,7 +590,7 @@ const GiftPage: React.FC = () => {
       )}
 
       {/* === Блок с заданиями === */}
-      {showTasks && tasks.length > 0 && (
+      {settings && settings.showTasks && showTasks && tasks.length > 0 && (
         <div className="tasks-section">
           <h2>Выполняйте задания</h2>
           <div className="tasks-list">
@@ -622,21 +644,48 @@ const GiftPage: React.FC = () => {
       )}
 
       {/* --- Минималистичный футер (без подложки) --- */}
-      <footer style={{width: '100%', background: 'none', borderTop: '1px solid #e3eaf5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px 8px 8px', marginTop: 48}}>
-        <div style={{marginBottom: 4}}>
-          <button onClick={() => setShowOfferModal(true)} style={{background: 'none', border: 'none', color: '#1976d2', fontWeight: 700, fontSize: '1em', cursor: 'pointer', textDecoration: 'underline', padding: 0}}>Пользовательская оферта</button>
-        </div>
-        <div style={{fontSize: '0.95em', color: '#888', fontWeight: 500}}>
-          Powered by <span style={{fontWeight: 900, color: '#1976d2'}}>DataNova</span> © {currentYear}
-        </div>
-      </footer>
+      {settings && settings.showFooter && (
+        <footer style={{width: '100%', background: 'none', borderTop: '1px solid #e3eaf5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px 8px 8px', marginTop: 48}}>
+          <div style={{marginBottom: 4}}>
+            <button onClick={() => setShowOfferModal(true)} style={{background: 'none', border: 'none', color: '#1976d2', fontWeight: 700, fontSize: '1em', cursor: 'pointer', textDecoration: 'underline', padding: 0}}>Пользовательская оферта</button>
+          </div>
+          <div style={{fontSize: '0.95em', color: '#888', fontWeight: 500}}>
+            Powered by <span style={{fontWeight: 900, color: '#1976d2'}}>DataNova</span> © {currentYear}
+          </div>
+        </footer>
+      )}
 
       {/* --- Минималистичная модалка оферты --- */}
       {showOfferModal && settings && (
         <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(33,50,80,0.13)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{background: '#fff', borderRadius: 16, boxShadow: '0 8px 32px rgba(33,150,243,0.10)', padding: 32, maxWidth: 420, width: '92%', position: 'relative', minHeight: 120}}>
-            <button onClick={() => setShowOfferModal(false)} style={{position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 22, color: '#1976d2', cursor: 'pointer', fontWeight: 900, lineHeight: 1}} aria-label="Закрыть оферту">×</button>
-            <div style={{fontSize: '1em', color: '#222', fontWeight: 400, lineHeight: 1.6, textAlign: 'left'}} dangerouslySetInnerHTML={{__html: settings.offer_text || ''}} />
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 16,
+              boxShadow: '0 8px 32px rgba(33,150,243,0.10)',
+              padding: 24,
+              maxWidth: 700,
+              width: '98%',
+              minHeight: 120,
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              position: 'relative',
+              wordBreak: 'break-word',
+              fontSize: '1em',
+              lineHeight: 1.6,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <div style={{fontSize: '1em', color: '#222', fontWeight: 400, lineHeight: 1.6, textAlign: 'left', flex: 1}} dangerouslySetInnerHTML={{__html: settings.offer_text || ''}} />
+            <button 
+              onClick={() => setShowOfferModal(false)} 
+              className="offer-close-btn"
+              style={{position: 'sticky', bottom: 0, width: '100%', marginTop: 24, borderRadius: 0, borderBottomLeftRadius: 12, borderBottomRightRadius: 12, fontSize: '1.1em', padding: '16px 0', background: '#f7faff', border: '2px solid #1976d2', color: '#1976d2', fontWeight: 700, cursor: 'pointer', zIndex: 10, boxShadow: '0 -2px 8px rgba(33,150,243,0.07)'}}
+              aria-label="Закрыть оферту"
+            >
+              Закрыть
+            </button>
           </div>
         </div>
       )}

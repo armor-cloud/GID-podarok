@@ -34,6 +34,11 @@ class Task(TaskBase):
 class SettingsBase(BaseModel):
     logo_url: Optional[str] = None
     offer_text: Optional[str] = None
+    showTimer: Optional[bool] = None
+    timerTitle: Optional[str] = None
+    showWheel: Optional[bool] = None
+    showTasks: Optional[bool] = None
+    showFooter: Optional[bool] = None
 
 class SettingsUpdate(SettingsBase):
     pass

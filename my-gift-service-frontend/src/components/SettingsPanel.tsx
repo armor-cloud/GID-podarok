@@ -77,8 +77,8 @@ const SettingsPanel: React.FC = () => {
   };
 
   return (
-    <div className="settings-panel" style={{background: '#f7faff', borderRadius: 20, boxShadow: '0 4px 24px rgba(33,150,243,0.10)', padding: 32, marginBottom: 32, maxWidth: 480, margin: '0 auto 32px auto'}}>
-      <h2 style={{marginTop: 0, marginBottom: 18, fontWeight: 900, fontSize: '1.5em', color: '#0d47a1'}}>Enterprise-настройки</h2>
+    <div className="settings-panel" style={{background: '#f7faff', borderRadius: 20, boxShadow: '0 4px 24px rgba(33,150,243,0.10)', padding: 32, marginBottom: 32, width: '100%', maxWidth: '100%', minWidth: 320}}>
+      {/* <h2 style={{marginTop: 0, marginBottom: 18, fontWeight: 900, fontSize: '1.5em', color: '#0d47a1'}}>Enterprise-настройки</h2> */}
       {loading && <div>Загрузка...</div>}
       {error && <div style={{color: 'red', marginBottom: 10}}>{error}</div>}
       {success && <div style={{color: 'green', marginBottom: 10}}>{success}</div>}

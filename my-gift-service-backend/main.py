@@ -203,7 +203,12 @@ def init_settings():
     if db.query(SettingsModel).count() == 0:
         default_settings = SettingsModel(
             logo_url="/static/logos/default_logo.png",
-            offer_text="<h2>Пользовательская оферта</h2><p>Текст оферты по умолчанию.</p>"
+            offer_text="""<h2>Пользовательская оферта</h2><p>Текст оферты по умолчанию.</p>""",
+            showTimer=True,
+            timerTitle="Выберите подарок за 5 минут",
+            showWheel=True,
+            showTasks=True,
+            showFooter=True
         )
         db.add(default_settings)
         db.commit()

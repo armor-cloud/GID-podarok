@@ -31,4 +31,9 @@ class Settings(Base):
     __tablename__ = 'settings'
     id = Column(Integer, primary_key=True, index=True)
     logo_url = Column(String, nullable=True)  # Путь к логотипу
-    offer_text = Column(Text, nullable=True)  # Текст оферты (можно html) 
+    offer_text = Column(Text, nullable=True)  # Текст оферты (можно html)
+    showTimer = Column(Boolean, default=True)
+    timerTitle = Column(String, nullable=True)
+    showWheel = Column(Boolean, default=True)
+    showTasks = Column(Boolean, default=True)
+    showFooter = Column(Boolean, default=True) 
