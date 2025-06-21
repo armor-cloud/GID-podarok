@@ -7,17 +7,15 @@ export interface GiftCardProps {
   // illustration?: string; // Удаляем, используем logo как основную картинку
   title: string; // Название подарка (теперь часть текста)
   description: string; // Описание подарка (теперь часть текста)
-  points: string; // **ДОБАВЛЕНО** Поле для баллов
-  isHighlighted?: boolean; // Метка ХИТ
+  points?: string; // **ИЗМЕНЕНО** Поле для баллов стало необязательным
   isHit?: boolean;
   isSelected?: boolean; // Выбранная карточка (для подсветки)
-  isClaimed?: boolean; // Активированный подарок
   onClick: (id: number) => void; // Обработчик клика
   disabled?: boolean; // Отключенное состояние
   className?: string; // Добавляем опциональное свойство className
 }
 
-const GiftCard: React.FC<GiftCardProps> = ({ id, logo, title, description, points, isHighlighted, isHit, isSelected, isClaimed, onClick, disabled, className }) => {
+const GiftCard: React.FC<GiftCardProps> = ({ id, logo, title, description, points, isHit, isSelected, onClick, disabled, className }) => {
   const handleClick = () => {
     if (!disabled) {
       onClick(id);
@@ -38,7 +36,7 @@ const GiftCard: React.FC<GiftCardProps> = ({ id, logo, title, description, point
       <div className="gift-card-text-content">
         <h3>{title}</h3>
         <p>{description}</p>
-        <p className="gift-points">{points}</p>
+        {points && <p className="gift-points">{points}</p>}
       </div>
     </div>
   );

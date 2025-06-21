@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.types import JSON
 from database import Base
 from datetime import datetime
 
@@ -7,11 +9,16 @@ class Gift(Base):
     id = Column(Integer, primary_key=True, index=True)
     logo = Column(String, nullable=False)
     title = Column(String, nullable=False)
-    description = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
     isHighlighted = Column(Boolean, default=False)
     isClaimed = Column(Boolean, default=False)
     isHit = Column(Boolean, default=False)
     redirect_url = Column(String, nullable=True)
+    action_type = Column(String, nullable=False, default='redirect')  # 'redirect', 'show_promo', 'collect_email'
+    popup_config = Column(JSON, nullable=True)
+
+    promo_codes = relationship("PromoCode", back_populates="gift", cascade="all, delete-orphan")
+    email_leads = relationship("EmailLead", back_populates="gift", cascade="all, delete-orphan")
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -26,6 +33,26 @@ class Task(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     expires_at = Column(DateTime, nullable=True)
     details = Column(String, nullable=True)
+
+class PromoCode(Base):
+    __tablename__ = 'promo_codes'
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String, nullable=False, index=True)
+    gift_id = Column(Integer, ForeignKey('gifts.id'), nullable=False)
+    is_used = Column(Boolean, default=False)
+    used_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    gift = relationship("Gift", back_populates="promo_codes")
+
+class EmailLead(Base):
+    __tablename__ = 'email_leads'
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, nullable=False, index=True)
+    gift_id = Column(Integer, ForeignKey('gifts.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    gift = relationship("Gift", back_populates="email_leads")
 
 class Settings(Base):
     __tablename__ = 'settings'

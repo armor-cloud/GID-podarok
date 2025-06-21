@@ -32,7 +32,7 @@ const GiftPageSettings: React.FC = () => {
       setLoading(true);
       const res = await axios.get('/api/settings');
       setSettings(res.data);
-    } catch (e) {
+    } catch {
       // Если нет настроек — используем дефолтные
       setSettings(defaultSettings);
     } finally {
@@ -55,7 +55,7 @@ const GiftPageSettings: React.FC = () => {
     try {
       await axios.put('/api/settings', settings);
       setSuccess('Настройки успешно сохранены!');
-    } catch (e) {
+    } catch {
       setError('Ошибка сохранения настроек');
     } finally {
       setLoading(false);

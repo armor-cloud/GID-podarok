@@ -57,10 +57,12 @@ body {
 .App {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px 0; /* Уменьшаем вертикальный отступ, убираем горизонтальный */
-  width: 100%; /* Убедимся, что App занимает всю ширину */
-  box-sizing: border-box; /* Учитываем padding в ширине */
+  min-height: 100vh; /* Занимает всю высоту экрана */
+  align-items: stretch; /* Растягиваем дочерние элементы */
+  justify-content: space-between; /* Прижимаем футер к низу */
+  padding: 20px 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 h1 {
@@ -124,6 +126,7 @@ h1 {
   padding: 0 10px; /* Добавляем небольшой горизонтальный отступ к основному контейнеру */
   box-sizing: border-box; /* Учитываем padding */
   position: relative; /* Для абсолютного позиционирования логотипа */
+  flex-grow: 1; /* Растягиваем контейнер, чтобы занять доступное пространство */
 }
 
 .gift-content {

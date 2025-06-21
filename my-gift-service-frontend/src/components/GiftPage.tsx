@@ -1,4 +1,3 @@
-// ТЕСТ: ЭТО НОВАЯ СТРОКА КОММЕНТАРИЯ ДЛЯ ПРОВЕРКИ
 import React, { useState, useEffect, useRef } from 'react';
 // Импортируем только сам компонент, не его тип, так как мы определим тип здесь же.
 import GiftCard from './GiftCard';
@@ -8,42 +7,8 @@ import './GiftPage.css'; // Удаляем импорт удаленного ф�
 import GiftDetailsPopup from './GiftDetailsPopup'; // Импортируем новый компонент попапа
 import { taskService } from '../api/taskService';
 import type { Task } from '../api/taskService';
+import type { Gift } from '../api/giftService'; // BKLG-1: Use imported Gift type
 import axios from 'axios';
-
-interface Gift {
-  id: number;
-  logo: string;
-  illustration: string; // Добавляем поле для иллюстрации
-  title: string;
-  description: string;
-  points: string; // Добавляем поле для баллов
-  isHighlighted: boolean;
-  isClaimed: boolean;
-  redirect_url?: string; // Добавляем опциональное поле для URL редиректа
-  isHit: boolean;
-}
-
-// Определяем тип для GiftCardProps, включая points
-interface GiftCardProps {
-  id: number;
-  logo: string;
-  title: string;
-  description: string;
-  points: string; // Добавляем points в типизацию
-  isHighlighted: boolean;
-  isClaimed: boolean;
-  onClick: () => Promise<void>;
-  isSelected: boolean;
-  className?: string; // Добавляем опциональное свойство className
-  isHit: boolean;
-}
-
-// Определяем тип для GiftDetailsPopupProps, включая onClaim
-interface GiftDetailsPopupProps {
-  gift: Gift;
-  onClose: () => void;
-  onClaim: () => Promise<void>; // Добавляем onClaim в типизацию
-}
 
 const GiftPage: React.FC = () => {
   // Состояние для списка подарков
@@ -56,12 +21,6 @@ const GiftPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   // Состояние ошибки при загрузке списка подарков
   const [fetchError, setFetchError] = useState<string | null>(null);
-  // Состояние загрузки при активации подарка
-  const [claimingGift, setClaimingGift] = useState(false);
-  // Состояние успешной активации
-  const [claimSuccess, setClaimSuccess] = useState<string | null>(null);
-  // Состояние ошибки при активации подарка
-  const [claimError, setClaimError] = useState<string | null>(null);
   
   // Новые состояния для попапа успешной активации
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -74,9 +33,6 @@ const GiftPage: React.FC = () => {
 
   // Состояние для управления видимостью секции подарков
   const [showGiftSection, setShowGiftSection] = useState(true);
-
-  // Состояние для хранения user_id
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Новое состояние для отслеживания развернутых карточек заданий
   const [expandedTaskIds, setExpandedTaskIds] = useState<Set<number>>(new Set());
@@ -178,9 +134,11 @@ const GiftPage: React.FC = () => {
         if (data.length === 0) {
           setShowGiftSection(false);
         } else {
-          const giftsWithDetails = data.map((gift: any) => ({
+          const giftsWithDetails = data.map((gift: Gift) => ({
             ...gift,
             illustration: `/static/illustrations/default_illustration_2.png`,
+            action_type: gift.action_type || 'redirect',
+            promo_codes: gift.promo_codes || [],
           }));
           setGifts(giftsWithDetails);
         }
@@ -252,15 +210,6 @@ const GiftPage: React.FC = () => {
     });
   };
 
-  // Функция для расчета позиции карточки
-  const getCardPosition = (index: number) => {
-    const container = scrollContainerRef.current;
-    const card = contentRef.current?.children[index] as HTMLElement;
-    if (!container || !card) return 0;
-    const cardWidth = card.offsetWidth + parseFloat(getComputedStyle(card).marginRight);
-    return index * cardWidth;
-  };
-
   // Функция для выбора случайного подарка и расчета целевой позиции
   const selectRandomGift = () => {
     if (!contentRef.current || !scrollContainerRef.current) return;
@@ -268,8 +217,6 @@ const GiftPage: React.FC = () => {
     const container = scrollContainerRef.current;
     const content = contentRef.current;
     const containerWidth = container.offsetWidth;
-    const contentWidth = content.scrollWidth;
-    const singleListWidth = contentWidth / 3;
 
     // Выбираем случайный подарок из оригинального списка
     const randomGiftIndex = Math.floor(Math.random() * gifts.length);
@@ -344,11 +291,9 @@ const GiftPage: React.FC = () => {
         }
         break;
 
-      case 'decelerate':
-        const distanceToTarget = animationState.current.targetScroll !== null ? animationState.current.targetScroll - container.scrollLeft : 0;
-
+      case 'decelerate': {
         // Новая логика замедления: уменьшаем скорость пропорционально расстоянию до цели
-        let decelerationAmount = 1; // Минимальное значение уменьшения скорости за кадр для плавного замедления (около 5 секунд с 300 до 0)
+        const decelerationAmount = 1; // Минимальное значение уменьшения скорости за кадр для плавного замедления (около 5 секунд с 300 до 0)
 
         // Применяем замедление с учетом направления скорости
         if (currentVelocity > 0) {
@@ -369,6 +314,7 @@ const GiftPage: React.FC = () => {
         animationState.current.velocity = currentVelocity;
         container.scrollLeft += currentVelocity;
         break;
+      }
 
       case 'idle':
       default:
@@ -468,7 +414,7 @@ const GiftPage: React.FC = () => {
   const minutes = Math.ceil(timeLeft / 60);
 
   return (
-    <div className="gift-page-container" style={{position: 'relative', minHeight: '100vh', paddingBottom: 0}}>
+    <div className="gift-page-container" style={{position: 'relative', paddingBottom: 0}}>
       {/* --- Логотип в правом верхнем углу --- */}
       {settings && settings.logo_url && (
         <img 
@@ -516,13 +462,11 @@ const GiftPage: React.FC = () => {
                 <GiftCard
                   key={gift.id}
                   id={gift.id}
-                  logo={gift.logo}
-                  title={gift.title}
-                  description={gift.description}
-                  points={gift.points}
-                  isHighlighted={gift.isHighlighted}
+                  logo={gift.logo || ''}
+                  title={gift.title || ''}
+                  description={gift.description || ''}
+                  points={gift.points || ''}
                   isHit={gift.isHit}
-                  isClaimed={gift.isClaimed}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
                   className={selectedGiftId === gift.id ? 'selected' : ''}
@@ -533,13 +477,11 @@ const GiftPage: React.FC = () => {
                 <GiftCard
                   key={`copy1-${gift.id}`}
                   id={gift.id}
-                  logo={gift.logo}
-                  title={gift.title}
-                  description={gift.description}
-                  points={gift.points}
-                  isHighlighted={gift.isHighlighted}
+                  logo={gift.logo || ''}
+                  title={gift.title || ''}
+                  description={gift.description || ''}
+                  points={gift.points || ''}
                   isHit={gift.isHit}
-                  isClaimed={gift.isClaimed}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
                   className={selectedGiftId === gift.id ? 'selected' : ''}
@@ -549,13 +491,11 @@ const GiftPage: React.FC = () => {
                 <GiftCard
                   key={`copy2-${gift.id}`}
                   id={gift.id}
-                  logo={gift.logo}
-                  title={gift.title}
-                  description={gift.description}
-                  points={gift.points}
-                  isHighlighted={gift.isHighlighted}
+                  logo={gift.logo || ''}
+                  title={gift.title || ''}
+                  description={gift.description || ''}
+                  points={gift.points || ''}
                   isHit={gift.isHit}
-                  isClaimed={gift.isClaimed}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
                   className={selectedGiftId === gift.id ? 'selected' : ''}
@@ -626,9 +566,6 @@ const GiftPage: React.FC = () => {
         <GiftDetailsPopup
           gift={selectedGiftDetails}
           onClose={closeDetailsPopup}
-          onClaim={async () => { 
-            // Здесь будет логика активации подарка
-          }}
         />
       )}
 
@@ -645,7 +582,7 @@ const GiftPage: React.FC = () => {
 
       {/* --- Минималистичный футер (без подложки) --- */}
       {settings && settings.showFooter && (
-        <footer style={{width: '100%', background: 'none', borderTop: '1px solid #e3eaf5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px 8px 8px', marginTop: 48}}>
+        <footer style={{width: '100%', background: 'none', borderTop: '1px solid #e3eaf5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px 8px 8px', marginTop: 'auto'}}>
           <div style={{marginBottom: 4}}>
             <button onClick={() => setShowOfferModal(true)} style={{background: 'none', border: 'none', color: '#1976d2', fontWeight: 700, fontSize: '1em', cursor: 'pointer', textDecoration: 'underline', padding: 0}}>Пользовательская оферта</button>
           </div>

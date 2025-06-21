@@ -2,111 +2,270 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный фон */
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 24, 69, 0.4); /* Deeper, branded overlay color */
+  backdrop-filter: blur(4px); /* Frosted glass effect */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Убедимся, что попап поверх всего */
+  z-index: 1000;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .popup-content {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; /* Шрифт без засечек как в примере */
-  background-color: #ffffff; /* Белый фон попапа, как в примере */
-  padding: 40px; /* Увеличиваем отступ */
-  border-radius: 12px; /* Делаем углы более скругленными */
-  position: relative; /* Для позиционирования кнопки закрытия */
-  max-width: 400px; /* Уменьшаем максимальную ширину для десктопа */
-  max-height: 90vh; /* Ограничиваем максимальную высоту чуть больше */
-  overflow-y: auto; /* Добавляем скролл, если контент не помещается */
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Более выраженная тень */
-  width: 90%; /* Занимаем 90% ширины для адаптивности */
+  background-color: #ffffff;
+  border-radius: 20px; /* Softer corners */
+  position: relative;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center; /* Центрируем текст внутри попапа */
+  text-align: left; /* Change default alignment */
 }
 
-.popup-content h2 {
-  margin-top: 0;
-  margin-bottom: 25px; /* Увеличиваем отступ снизу */
-  font-size: 1.6em; /* Увеличиваем размер заголовка */
-  color: #333; /* Темнее цвет заголовка */
+.popup-content::-webkit-scrollbar {
+  display: none;
+}
+.popup-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.close-button {
+.popup-close-btn {
   position: absolute;
-  top: 15px; /* Отступ сверху */
-  right: 15px; /* Отступ справа */
-  background: none;
+  top: 12px;
+  right: 14px;
+  background: transparent;
   border: none;
-  font-size: 1.8em; /* Увеличиваем размер кнопки закрытия */
   cursor: pointer;
-  color: #888; /* Чуть светлее цвет кнопки закрытия */
-}
-
-.gift-illustration {
-  max-width: 100%; /* Иллюстрация на всю ширину контейнера */
-  height: auto; /* Автоматическая высота для сохранения пропорций */
-  max-height: 35vh; /* Ограничиваем максимальную высоту немного */
-  display: block;
-  margin: 0 auto 30px auto; /* Центрируем и добавляем больший отступ снизу */
-}
-
-.promo-input-container {
-  display: flex;
-  flex-direction: column; /* Поле ввода и кнопка в столбик по умолчанию */
-  gap: 15px; /* Отступ между полем и кнопкой */
-  margin-bottom: 20px; /* Увеличиваем отступ */
-  width: 100%; /* Занимает всю доступную ширину */
-  max-width: 300px; /* Ограничиваем ширину контейнера с полем и кнопкой */
-}
-
-.promo-input {
-  flex-grow: 1; /* Поле ввода занимает максимум места */
-  padding: 12px 18px; /* Внутренние отступы */
-  border: none; /* Убираем рамку */
-  background-color: #f2f2f2; /* Еще более светлый серый фон */
-  border-radius: 25px; /* Сильнее скругленные углы */
-  font-size: 1em;
-  outline: none; /* Убираем стандартную обводку при фокусе */
-  text-align: center; /* Центрируем текст внутри поля ввода */
-  color: #333; /* Темнее цвет текста */
-}
-
-.activate-button {
-  padding: 12px 25px; /* Внутренние отступы */
-  background-color: #e0e0e0; /* Серый цвет кнопки как в примере */
-  color: #555; /* Темно-серый текст */
-  border: none;
-  border-radius: 25px; /* Сильнее скругленные углы */
-  cursor: pointer;
-  font-size: 1em;
+  font-size: 28px;
   font-weight: bold;
-  transition: background-color 0.3s ease;
-  width: 100%; /* Кнопка занимает всю ширину в контейнере */
+  line-height: 1;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  z-index: 20;
+  padding: 5px;
+  transition: transform 0.2s ease;
 }
 
-.activate-button:hover {
-  background-color: #d5d5d5;
+.popup-close-btn:hover {
+  transform: scale(1.2);
 }
 
-.no-promo-link {
-  text-align: center;
-  font-size: 0.9em;
-  margin-bottom: 15px; /* Увеличиваем отступ снизу */
-  color: #0070d2; /* Синий цвет ссылки */
-  text-decoration: underline; /* Подчеркивание как в примере */
+.popup-header {
+  position: relative;
+  background-color: #f7f7f7; /* Default background if no image */
+}
+
+.popup-logo {
+  width: 100%;
+  height: 180px; /* Fixed height for the banner */
+  object-fit: cover;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.popup-updated-at {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+/* BKLG-1: Main body content with padding */
+.popup-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Spacing between elements in the body */
+}
+
+.popup-title {
+  font-size: 1.75em;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.popup-subtitle {
+  font-size: 1.1em;
+  color: #555;
+  margin: -8px 0 0 0; /* Tighter spacing with title */
+}
+
+/* BKLG-1: Action section styles (email, promo, buttons) */
+.action-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.popup-email-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #dbe1e8;
+  border-radius: 12px;
+  font-size: 1em;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.popup-email-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.popup-claim-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  font-size: 1.1em;
+  font-weight: 600;
   cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
 }
 
-.terms-text {
-  text-align: center;
-  font-size: 0.75em; /* Немного увеличиваем размер текста */
-  color: #888; /* Чуть светлее тусклый цвет текста */
-  line-height: 1.4; /* Увеличиваем межстрочный интервал */
+.popup-claim-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+}
+
+.popup-claim-btn:disabled {
+  background: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* BKLG-1: Styled sections for descriptions, lists, etc. */
+.popup-description,
+.popup-benefits,
+.popup-activation {
+  font-size: 1em;
+  color: #333;
+  line-height: 1.6;
+}
+
+.popup-activation h4 {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  user-select: none;
+  gap: 8px;
+}
+
+.activation-toggle-icon {
+  display: inline-block;
+  transition: transform 0.2s ease-in-out;
+  font-size: 0.6em;
+  color: #555;
+}
+
+.activation-toggle-icon.open {
+  transform: rotate(180deg);
+}
+
+.popup-activation ol {
+  padding-left: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Space between list items */
+}
+
+.popup-benefits li,
+.popup-activation li {
+  padding-left: 8px; /* Space between bullet/number and text */
+}
+
+/* BKLG-1: Legal and terms text styling */
+.popup-terms,
+.popup-legal {
+  font-size: 0.8em;
+  color: #666;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.popup-terms a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+/* BKLG-1: Success/Error message styling */
+.popup-error,
+.popup-success {
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.popup-error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.popup-success {
+  color: #155724;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.promo-code-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #e9ecef;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-top: 10px;
+  border: 1px dashed #ced4da;
+}
+
+.promo-code-container strong {
+  font-size: 1.4em;
+  color: #000;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.copy-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.copy-btn:hover {
+  background-color: #0056b3;
 }
 
 /* Стилизация для мобильных устройств */

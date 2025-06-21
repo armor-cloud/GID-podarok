@@ -6,11 +6,12 @@ from typing import List, Optional
 import uuid
 import os
 from starlette.responses import JSONResponse
-from sqlalchemy.orm import Session
-from models import Gift as GiftModel, Settings as SettingsModel
+from sqlalchemy.orm import Session, selectinload
+from models import Gift as GiftModel, Settings as SettingsModel, PromoCode as PromoCodeModel, EmailLead as EmailLeadModel
 from database import SessionLocal, engine, Base
 import schemas
 import models
+from datetime import datetime
 
 app = FastAPI()
 
@@ -28,7 +29,8 @@ os.makedirs("static/logos", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Создаём таблицы
-Base.metadata.create_all(bind=engine)
+# BKLG-1: Base.metadata.create_all(bind=engine) is deprecated when using Alembic
+# Base.metadata.create_all(bind=engine)
 
 # Pydantic-схемы
 class GiftBase(BaseModel):
@@ -62,22 +64,25 @@ def get_db():
 def read_root():
     return {"message": "Welcome to Gift Service Backend!"}
 
-@app.get("/gifts", response_model=List[GiftOut])
+# BKLG-1: Use options for eager loading
+@app.get("/gifts", response_model=List[schemas.GiftOut])
 def get_gifts(db: Session = Depends(get_db), only_highlighted: bool = False):
+    query = db.query(GiftModel).options(selectinload(GiftModel.promo_codes))
     if only_highlighted:
-        return db.query(GiftModel).filter(GiftModel.isHighlighted == True).all()
-    return db.query(GiftModel).all()
+        return query.filter(GiftModel.isHighlighted == True).all()
+    return query.all()
 
-@app.post("/gifts", response_model=GiftOut)
-def create_gift(gift: GiftCreate, db: Session = Depends(get_db)):
+@app.post("/gifts", response_model=List[schemas.GiftOut])
+def create_gift(gift: schemas.GiftCreate, db: Session = Depends(get_db)):
     db_gift = GiftModel(**gift.dict())
     db.add(db_gift)
     db.commit()
     db.refresh(db_gift)
-    return db_gift
+    # BKLG-1-FIX: Return all gifts to prevent UI errors
+    return db.query(GiftModel).options(selectinload(GiftModel.promo_codes)).all()
 
-@app.put("/gifts/{gift_id}", response_model=GiftOut)
-def update_gift(gift_id: int, gift: GiftUpdate, db: Session = Depends(get_db)):
+@app.put("/gifts/{gift_id}", response_model=List[schemas.GiftOut])
+def update_gift(gift_id: int, gift: schemas.GiftUpdate, db: Session = Depends(get_db)):
     db_gift = db.query(GiftModel).filter(GiftModel.id == gift_id).first()
     if not db_gift:
         raise HTTPException(status_code=404, detail="Gift not found")
@@ -85,7 +90,8 @@ def update_gift(gift_id: int, gift: GiftUpdate, db: Session = Depends(get_db)):
         setattr(db_gift, key, value)
     db.commit()
     db.refresh(db_gift)
-    return db_gift
+    # BKLG-1-FIX: Return all gifts to prevent UI errors
+    return db.query(GiftModel).options(selectinload(GiftModel.promo_codes)).all()
 
 @app.delete("/gifts/{gift_id}")
 def delete_gift(gift_id: int, db: Session = Depends(get_db)):
@@ -96,21 +102,93 @@ def delete_gift(gift_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"ok": True}
 
+# BKLG-1: Endpoint to claim a gift based on action_type
+@app.post("/gifts/{gift_id}/claim")
+async def claim_gift(gift_id: int, email_lead: Optional[schemas.EmailLeadCreate] = None, db: Session = Depends(get_db)):
+    db_gift = db.query(GiftModel).filter(GiftModel.id == gift_id).first()
+    if not db_gift:
+        raise HTTPException(status_code=404, detail="Gift not found")
+
+    if db_gift.action_type == 'collect_email':
+        if not email_lead or not email_lead.email:
+            raise HTTPException(status_code=400, detail="Email is required for this gift type")
+        
+        new_lead = EmailLeadModel(email=email_lead.email, gift_id=gift_id)
+        db.add(new_lead)
+        db.commit()
+        return {"message": "Email collected successfully. We will contact you shortly."}
+
+    elif db_gift.action_type == 'show_promo':
+        promo_code = db.query(PromoCodeModel).filter(
+            PromoCodeModel.gift_id == gift_id,
+            PromoCodeModel.is_used == False
+        ).first()
+
+        if not promo_code:
+            raise HTTPException(status_code=404, detail="No available promo codes for this gift.")
+
+        promo_code.is_used = True
+        promo_code.used_at = datetime.utcnow()
+        db.commit()
+        return {"promo_code": promo_code.code}
+    
+    elif db_gift.action_type == 'redirect':
+        return {"redirect_url": db_gift.redirect_url}
+        
+    else:
+        raise HTTPException(status_code=400, detail="Invalid gift action type")
+
+# BKLG-2: Endpoint to upload promo codes from a file
+@app.post("/gifts/{gift_id}/promo_codes/upload")
+async def upload_promo_codes(gift_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    db_gift = db.query(GiftModel).filter(GiftModel.id == gift_id).first()
+    if not db_gift:
+        raise HTTPException(status_code=404, detail="Gift not found")
+
+    if file.content_type not in ["text/plain", "text/csv"]:
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a .txt or .csv file.")
+
+    content = await file.read()
+    lines = content.decode("utf-8").splitlines()
+
+    new_promo_codes = []
+    for line in lines:
+        code = line.strip()
+        if code:
+            # Simple validation, more can be added
+            if len(code) > 50:
+                continue
+            # Check for duplicates before adding
+            exists = db.query(PromoCodeModel).filter(PromoCodeModel.gift_id == gift_id, PromoCodeModel.code == code).first()
+            if not exists:
+                new_promo_codes.append(PromoCodeModel(gift_id=gift_id, code=code))
+    
+    if new_promo_codes:
+        db.bulk_save_objects(new_promo_codes)
+        db.commit()
+
+    return {"message": f"{len(new_promo_codes)} new promo codes uploaded successfully."}
+
 # --- Автоинициализация стартовых подарков ---
 def init_gifts():
     mock_gifts = [
-        {"logo": "/static/logos/gazprombonus.png", "title": "Газпром Бонус", "description": "800 баллов Плюса за открытие карты ГПБ", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gazprombonus.ru/activate"},
-        {"logo": "/static/logos/gid.png", "title": "Скидка на Заправках", "description": "Скидка 5₽ с литра с картой ГПБ", "isHighlighted": True, "isClaimed": False, "redirect_url": "https://gid.ru/fuel"},
-        {"logo": "/static/logos/gid.png", "title": "GID Путешествия", "description": "До 10% кешбэка рублями в GID Путешествиях", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gid.ru/travel"},
-        {"logo": "/static/logos/premier.png", "title": "PREMIER", "description": "Месяц бесплатной подписки на онлайн-кинотеатр", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://premier.one/activate"},
-        {"logo": "/static/logos/rutube.png", "title": "RUTUBE", "description": "Эксклюзивный контент и бонусы для подписчиков", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://rutube.ru/activate"},
-        {"logo": "/static/logos/gazprombank.png", "title": "Газпромбанк", "description": "Специальные условия по дебетовой карте", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gazprombank.ru/card"},
+        {"logo": "/static/logos/gazprombonus.png", "title": "Газпром Бонус", "description": "800 баллов Плюса за открытие карты ГПБ", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gazprombonus.ru/activate", "action_type": "redirect"},
+        {"logo": "/static/logos/gid.png", "title": "Скидка на Заправках", "description": "Скидка 5₽ с литра с картой ГПБ", "isHighlighted": True, "isClaimed": False, "redirect_url": "https://gid.ru/fuel", "action_type": "redirect"},
+        {"logo": "/static/logos/gid.png", "title": "GID Путешествия", "description": "До 10% кешбэка рублями в GID Путешествиях", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gid.ru/travel", "action_type": "redirect"},
+        {"logo": "/static/logos/premier.png", "title": "PREMIER", "description": "Месяц бесплатной подписки на онлайн-кинотеатр", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://premier.one/activate", "action_type": "collect_email"},
+        {"logo": "/static/logos/rutube.png", "title": "RUTUBE", "description": "Эксклюзивный контент и бонусы для подписчиков", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://rutube.ru/activate", "action_type": "redirect"},
+        {"logo": "/static/logos/gazprombank.png", "title": "Газпромбанк", "description": "Специальные условия по дебетовой карте", "isHighlighted": False, "isClaimed": False, "redirect_url": "https://gazprombank.ru/card", "action_type": "collect_email"},
     ]
     db = SessionLocal()
-    if db.query(GiftModel).count() == 0:
-        for gift in mock_gifts:
-            db_gift = GiftModel(**gift)
-            db.add(db_gift)
+    # BKLG-1-FIX: Make seeding more robust
+    if db.query(GiftModel).count() < len(mock_gifts):
+        # Get existing titles to avoid duplicates
+        existing_titles = {gift.title for gift in db.query(GiftModel).all()}
+        
+        for gift_data in mock_gifts:
+            if gift_data["title"] not in existing_titles:
+                db_gift = GiftModel(**gift_data)
+                db.add(db_gift)
         db.commit()
     db.close()
 

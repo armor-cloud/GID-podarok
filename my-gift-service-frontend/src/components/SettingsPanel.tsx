@@ -28,7 +28,7 @@ const SettingsPanel: React.FC = () => {
       setSettings(res.data);
       setLogoPreview(res.data.logo_url);
       setOfferText(res.data.offer_text || '');
-    } catch (e: any) {
+    } catch {
       setError('Ошибка загрузки настроек');
     } finally {
       setLoading(false);
@@ -69,7 +69,7 @@ const SettingsPanel: React.FC = () => {
       setSuccess('Настройки успешно сохранены!');
       setLogoFile(null);
       fetchSettings();
-    } catch (e: any) {
+    } catch {
       setError('Ошибка сохранения настроек');
     } finally {
       setLoading(false);
