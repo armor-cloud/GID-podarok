@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ProfilePage.css';
 import { getGifts, deleteGift, createGift, updateGift, uploadPromoCodes } from '../api/giftService';
-import type { Gift, GiftInput, PopupConfig } from '../api/giftService';
+import type { Gift, GiftInput, PopupConfig, UTMParameter } from '../api/giftService';
 import { taskService } from '../api/taskService';
 import type { Task } from '../api/taskService';
 import SettingsPanel from '../components/SettingsPanel';
@@ -36,6 +36,7 @@ const initialGiftForm: GiftInput = {
   redirect_url: '',
   action_type: 'redirect',
   popup_config: initialPopupConfig,
+  utm_config: [],
 };
 
 const SECTIONS = [
@@ -151,6 +152,7 @@ const ProfilePage: React.FC = () => {
       redirect_url: gift.redirect_url ?? '',
       action_type: gift.action_type || 'redirect',
       popup_config: { ...initialPopupConfig, ...(gift.popup_config || {}) },
+      utm_config: gift.utm_config || [],
     });
     setFormMode('edit');
     setEditId(gift.id);
@@ -159,7 +161,7 @@ const ProfilePage: React.FC = () => {
 
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-    options?: { isConfig?: boolean; listName?: 'benefits' | 'activation_steps'; index?: number }
+    options?: { isConfig?: boolean; listName?: 'benefits' | 'activation_steps'; index?: number, isUtm?: boolean; utmKey?: 'key' | 'value' }
   ) => {
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
@@ -178,6 +180,10 @@ const ProfilePage: React.FC = () => {
           (newPopupConfig as Record<string, unknown>)[name] = type === 'checkbox' ? checked : value;
         }
         newFormGift.popup_config = newPopupConfig;
+      } else if (options?.isUtm && options.index !== undefined && options.utmKey) {
+        const newUtmConfig = [...(newFormGift.utm_config || [])];
+        newUtmConfig[options.index] = { ...newUtmConfig[options.index], [options.utmKey]: value };
+        newFormGift.utm_config = newUtmConfig;
       } else {
         (newFormGift as Record<string, unknown>)[name] = type === 'checkbox' ? checked : value;
       }
@@ -257,6 +263,20 @@ const ProfilePage: React.FC = () => {
       (newPopupConfig as Record<string, unknown>)[listName] = list;
       return { ...prev, popup_config: newPopupConfig };
     });
+  };
+
+  const addUtmItem = () => {
+    setFormGift(prev => ({
+      ...prev,
+      utm_config: [...(prev.utm_config || []), { key: '', value: '' }],
+    }));
+  };
+
+  const removeUtmItem = (index: number) => {
+    setFormGift(prev => ({
+      ...prev,
+      utm_config: prev.utm_config?.filter((_, i) => i !== index) || [],
+    }));
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -405,8 +425,8 @@ const ProfilePage: React.FC = () => {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   Добавить подарок
                 </button>
-              )}
-            </div>
+                        )}
+                      </div>
 
             {showForm ? (
               <div className="editor-layout">
@@ -464,6 +484,31 @@ const ProfilePage: React.FC = () => {
                       />
                     </div>
                   )}
+                  <fieldset className="form-fieldset">
+                    <legend>UTM-метки</legend>
+                    <div className="dynamic-list-group">
+                      {formGift.utm_config?.map((utm, index) => (
+                        <div key={index} className="dynamic-list-item utm-item">
+                          <input
+                            type="text"
+                            value={utm.key}
+                            onChange={(e) => handleFormChange(e, { isUtm: true, index, utmKey: 'key' })}
+                            placeholder="utm_source"
+                            className="utm-key-input"
+                          />
+                          <input
+                            type="text"
+                            value={utm.value}
+                            onChange={(e) => handleFormChange(e, { isUtm: true, index, utmKey: 'value' })}
+                            placeholder="gid-gifts"
+                            className="utm-value-input"
+                          />
+                          <button type="button" onClick={() => removeUtmItem(index)}>&times;</button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={addUtmItem}>+ Добавить UTM-метку</button>
+                    </div>
+                  </fieldset>
                   <fieldset className="form-fieldset">
                     <legend>Настройки внешнего вида попапа</legend>
                     <div className="gift-form-logo-block">

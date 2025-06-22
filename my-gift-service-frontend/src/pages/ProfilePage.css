@@ -910,7 +910,7 @@ input:checked + .slider:before {
 /* BKLG-1: Styles for the gift editor layout with live preview */
 .editor-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 3fr 2fr;
   width: 100%;
   gap: 48px;
   align-items: stretch;
@@ -1045,4 +1045,25 @@ input:checked + .slider:before {
 .gift-admin-action-buttons {
   display: flex;
   gap: 12px;
+}
+
+.dynamic-list-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.dynamic-list-item.utm-item {
+  gap: 12px;
+}
+.utm-key-input {
+  flex: 1;
+}
+.utm-value-input {
+  flex: 2;
+}
+
+.dynamic-list-group {
+  margin-bottom: 16px;
 } 

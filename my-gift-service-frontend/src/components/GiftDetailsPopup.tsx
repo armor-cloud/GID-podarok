@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import './GiftDetailsPopup.css';
-import type { Gift } from '../api/giftService';
+import type { Gift, UTMParameter } from '../api/giftService';
 
 interface GiftDetailsPopupProps {
   gift: Gift;
   onClose: () => void;
   isPreview?: boolean;
 }
+
+const buildUrlWithUtms = (baseUrl: string, utmConfig?: UTMParameter[]): string => {
+  if (!utmConfig || utmConfig.length === 0) {
+    return baseUrl;
+  }
+  const url = new URL(baseUrl);
+  utmConfig.forEach(utm => {
+    if (utm.key && utm.value) {
+      url.searchParams.append(utm.key, utm.value);
+    }
+  });
+  return url.toString();
+};
 
 const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose, isPreview = false }) => {
   const [email, setEmail] = useState('');
@@ -63,7 +76,8 @@ const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose, isPr
       } else if (gift.action_type === 'collect_email') {
         setSuccessMessage(data.message || 'Спасибо! Мы скоро с вами свяжемся.');
       } else if (gift.action_type === 'redirect' && data.redirect_url) {
-        window.open(data.redirect_url, '_blank');
+        const finalUrl = buildUrlWithUtms(data.redirect_url, gift.utm_config);
+        window.open(finalUrl, '_blank');
         onClose();
       }
     } catch (err: unknown) {
@@ -84,8 +98,9 @@ const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose, isPr
     if (promoCode) {
       navigator.clipboard.writeText(promoCode);
       if (gift.redirect_url) {
-        const url = gift.redirect_url.replace('{promo}', promoCode);
-        window.open(url, '_blank');
+        const urlWithPromo = gift.redirect_url.replace('{promo}', promoCode);
+        const finalUrl = buildUrlWithUtms(urlWithPromo, gift.utm_config);
+        window.open(finalUrl, '_blank');
       }
       onClose();
     }
@@ -101,12 +116,12 @@ const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose, isPr
                 <p>{successMessage}</p>
                 {promoCode && (
                     <>
-                        <div className="promo-code-container">
+                    <div className="promo-code-container">
                             <span className="promo-code-value">{promoCode}</span>
                             <button onClick={copyToClipboard} className="copy-btn-icon" aria-label="Копировать промокод">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                             </button>
-                        </div>
+                    </div>
                         {gift.redirect_url && (
                             <button onClick={copyAndGo} className="copy-and-go-btn">
                                 Скопировать и перейти
@@ -199,9 +214,9 @@ const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose, isPr
                 Как активировать?
               </h4>
               {isActivationStepsVisible && (
-                <ol>
-                  {config.activation_steps.map((item, index) => item && <li key={index}>{item}</li>)}
-                </ol>
+              <ol>
+                {config.activation_steps.map((item, index) => item && <li key={index}>{item}</li>)}
+              </ol>
               )}
             </div>
           )}

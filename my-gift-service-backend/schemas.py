@@ -2,6 +2,10 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
+class UTMParameter(BaseModel):
+    key: str
+    value: str
+
 class PopupConfig(BaseModel):
     imageUrl: Optional[str] = Field(None, alias='imageUrl')
     title: Optional[str] = None
@@ -90,6 +94,7 @@ class GiftBase(BaseModel):
     redirect_url: Optional[str] = None
     action_type: str = 'redirect'
     popup_config: Optional[PopupConfig] = None
+    utm_config: Optional[List[UTMParameter]] = None
 
 class GiftCreate(GiftBase):
     pass
@@ -104,6 +109,7 @@ class GiftUpdate(BaseModel):
     redirect_url: Optional[str] = None
     action_type: Optional[str] = None
     popup_config: Optional[PopupConfig] = None
+    utm_config: Optional[List[UTMParameter]] = None
 
 class GiftOut(GiftBase):
     id: int

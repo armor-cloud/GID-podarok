@@ -16,6 +16,7 @@ class Gift(Base):
     redirect_url = Column(String, nullable=True)
     action_type = Column(String, nullable=False, default='redirect')  # 'redirect', 'show_promo', 'collect_email'
     popup_config = Column(JSON, nullable=True)
+    utm_config = Column(JSON, nullable=True)
 
     promo_codes = relationship("PromoCode", back_populates="gift", cascade="all, delete-orphan")
     email_leads = relationship("EmailLead", back_populates="gift", cascade="all, delete-orphan")

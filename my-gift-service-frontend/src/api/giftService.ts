@@ -22,6 +22,11 @@ export interface PopupConfig {
   share_button_enabled?: boolean;
 }
 
+export interface UTMParameter {
+  key: string;
+  value: string;
+}
+
 export interface Gift {
   id: number;
   logo: string;
@@ -34,6 +39,7 @@ export interface Gift {
   action_type: 'redirect' | 'show_promo' | 'collect_email';
   popup_config?: PopupConfig;
   promo_codes_count?: number;
+  utm_config?: UTMParameter[];
 }
 
 export type GiftInput = Omit<Gift, 'id' | 'promo_codes_count'>;
@@ -42,12 +48,12 @@ export const getGifts = async (fromAdmin = false): Promise<Gift[]> => {
   const response = await api.get<Gift[]>('/gifts', {
     params: { from_admin: fromAdmin },
   });
-  return response.data;
+    return response.data;
 };
 
 export const createGift = async (gift: GiftInput): Promise<Gift[]> => {
   const response = await api.post<Gift[]>('/gifts', gift);
-  return response.data;
+    return response.data;
 };
 
 export const updateGift = async (id: number, gift: GiftInput): Promise<Gift[]> => {
@@ -64,7 +70,7 @@ export const uploadPromoCodes = async (giftId: number, file: File): Promise<{ me
       'Content-Type': 'multipart/form-data',
     },
   });
-  return response.data;
+    return response.data;
 };
 
 export const deleteGift = async (id: number): Promise<{ ok: boolean }> => {

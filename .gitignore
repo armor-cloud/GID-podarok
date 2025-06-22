@@ -39,3 +39,6 @@ ehthumbs.db
 Thumbs.db
 .ai_context/
 .gitignore
+
+# Python
+**/__pycache__/
