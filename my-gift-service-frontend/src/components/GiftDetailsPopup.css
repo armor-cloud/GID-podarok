@@ -231,41 +231,89 @@
 }
 
 .popup-success {
-  color: #155724;
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
+  background-image: linear-gradient(45deg, #84fab0 0%, #8fd3f4 100%);
+  color: #1f2937;
+  padding: 20px 24px;
+  border-radius: 16px;
+  margin-top: 16px;
+  text-align: center;
+  border: none;
+  box-shadow: 0 8px 32px rgba(143, 211, 244, 0.3);
+}
+.popup-success p {
+  margin: 0 0 16px 0;
+  font-weight: 700;
+  font-size: 1.1em;
+  color: #fff;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
 }
 
 .promo-code-container {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #e9ecef;
-  padding: 12px 16px;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.promo-code-value {
+  font-family: 'SF Mono', 'Courier New', Courier, monospace;
+  font-size: 1.6em;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: 2px;
+  word-break: break-all;
+}
+
+.promo-code-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.copy-btn-icon {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #374151;
   border-radius: 10px;
-  margin-top: 10px;
-  border: 1px dashed #ced4da;
-}
-
-.promo-code-container strong {
-  font-size: 1.4em;
-  color: #000;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-.copy-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background: #007bff;
-  color: #fff;
   cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+.copy-btn-icon:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.06);
 }
 
-.copy-btn:hover {
-  background-color: #0056b3;
+.copy-and-go-btn {
+  background: #374151;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0 24px;
+  height: 48px;
+  font-size: 1.05em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  width: 100%;
+  margin-top: 12px;
+}
+.copy-and-go-btn:hover {
+  background: #1f2937;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 /* Стилизация для мобильных устройств */

@@ -7,7 +7,7 @@ import './GiftPage.css'; // Удаляем импорт удаленного ф�
 import GiftDetailsPopup from './GiftDetailsPopup'; // Импортируем новый компонент попапа
 import { taskService } from '../api/taskService';
 import type { Task } from '../api/taskService';
-import type { Gift } from '../api/giftService'; // BKLG-1: Use imported Gift type
+import { getGifts, type Gift } from '../api/giftService'; // BKLG-2: Use imported Gift type and getGifts
 import axios from 'axios';
 
 const GiftPage: React.FC = () => {
@@ -116,29 +116,21 @@ const GiftPage: React.FC = () => {
 
   // Эффект для загрузки данных о подарках с бэкенда (оставляем как есть)
   useEffect(() => {
-    const fetchGifts = async () => {
+    const fetchGiftsData = async () => {
       try {
         setLoading(true);
         setFetchError(null);
-        const response = await fetch(`http://127.0.0.1:8000/gifts?only_highlighted=true`, {
-          credentials: 'include'
-        });
+        // BKLG-2: Use the getGifts function from the service
+        const data = await getGifts(); 
         
-        if (!response.ok) {
-          setFetchError("Ваши подарки еще в дороге, пожалуйста попробуйте проверить позже");
-          return;
-        }
-
-        const data = await response.json();
         console.log("Received gifts data:", data);
         if (data.length === 0) {
           setShowGiftSection(false);
         } else {
+          // The backend already filters and provides the correct data structure
           const giftsWithDetails = data.map((gift: Gift) => ({
             ...gift,
             illustration: `/static/illustrations/default_illustration_2.png`,
-            action_type: gift.action_type || 'redirect',
-            promo_codes: gift.promo_codes || [],
           }));
           setGifts(giftsWithDetails);
         }
@@ -151,7 +143,7 @@ const GiftPage: React.FC = () => {
       }
     };
 
-    fetchGifts();
+    fetchGiftsData();
   }, []);
 
   // Эффект для работы таймера (оставляем как есть)
@@ -171,7 +163,7 @@ const GiftPage: React.FC = () => {
   };
 
   // Обработчик клика по карточке подарка (оставляем как есть, но убираем логику прокрутки если была)
-  const handleGiftCardClick = async (giftId: number) => {
+  const handleGiftCardClick = (giftId: number) => {
     // Находим выбранный подарок по ID и открываем попап деталей
     const gift = gifts.find(g => g.id === giftId);
     if (gift) {
@@ -465,7 +457,6 @@ const GiftPage: React.FC = () => {
                   logo={gift.logo || ''}
                   title={gift.title || ''}
                   description={gift.description || ''}
-                  points={gift.points || ''}
                   isHit={gift.isHit}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
@@ -480,7 +471,6 @@ const GiftPage: React.FC = () => {
                   logo={gift.logo || ''}
                   title={gift.title || ''}
                   description={gift.description || ''}
-                  points={gift.points || ''}
                   isHit={gift.isHit}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
@@ -494,7 +484,6 @@ const GiftPage: React.FC = () => {
                   logo={gift.logo || ''}
                   title={gift.title || ''}
                   description={gift.description || ''}
-                  points={gift.points || ''}
                   isHit={gift.isHit}
                   onClick={() => handleGiftCardClick(gift.id)}
                   isSelected={selectedGiftId === gift.id}
@@ -571,7 +560,7 @@ const GiftPage: React.FC = () => {
 
       {/* Попап успешной активации */}
       {showSuccessPopup && (
-        <div className="success-popup">
+        <div className="success-popup-overlay" onClick={closeSuccessPopup}>
           <div className="success-popup-content">
             <h3>Поздравляем!</h3>
             <p>{successPopupMessage}</p>

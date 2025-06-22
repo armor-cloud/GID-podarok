@@ -253,21 +253,22 @@ body, .profile-page-container {
 .gift-admin-highlight {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-right: 24px;
-  margin-left: 10px;
-  font-size: 1.08em;
-  color: #1976d2;
+  gap: 12px;
+  cursor: pointer;
   font-weight: 700;
-  user-select: none;
+  color: #1976d2;
+  font-size: 1.05em;
+  padding: 4px;
+}
+
+.gift-admin-highlight:not(:last-child) {
+  margin-bottom: 8px;
 }
 
 .gift-admin-highlight input[type="checkbox"] {
-  width: 0;
-  height: 0;
-  opacity: 0;
-  position: absolute;
+  display: none;
 }
+
 .gift-admin-highlight input[type="checkbox"] + span {
   display: inline-block;
   width: 48px;
@@ -363,23 +364,24 @@ body, .profile-page-container {
   opacity: 1 !important;
 }
 .gift-admin-delete:hover {
-  background: #ffebee;
-  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.10);
+  background: #fbe9e7;
+  color: #c62828;
 }
 .gift-admin-add {
-  background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+  background: linear-gradient(90deg,#1976d2 60%,#42a5f5 100%);
   color: #fff;
-  font-weight: 900;
   border: none;
   border-radius: 12px;
-  padding: 16px 36px 16px 56px;
-  margin-bottom: 32px;
-  font-size: 1.25em;
+  padding: 14px 24px;
+  font-size: 1.05em;
+  font-weight: 800;
   cursor: pointer;
-  transition: background 0.22s, box-shadow 0.22s;
-  box-shadow: 0 2px 12px rgba(33, 150, 243, 0.13);
-  position: relative;
-  letter-spacing: -0.5px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(33,150,243,0.2);
 }
 .gift-admin-add:before {
   content: '';
@@ -1038,4 +1040,9 @@ input:checked + .slider:before {
   .editor-preview-column {
     position: static;
   }
+}
+
+.gift-admin-action-buttons {
+  display: flex;
+  gap: 12px;
 } 

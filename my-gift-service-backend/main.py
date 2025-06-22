@@ -66,11 +66,26 @@ def read_root():
 
 # BKLG-1: Use options for eager loading
 @app.get("/gifts", response_model=List[schemas.GiftOut])
-def get_gifts(db: Session = Depends(get_db), only_highlighted: bool = False):
+def get_gifts(db: Session = Depends(get_db), only_highlighted: bool = False, from_admin: bool = False):
     query = db.query(GiftModel).options(selectinload(GiftModel.promo_codes))
     if only_highlighted:
-        return query.filter(GiftModel.isHighlighted == True).all()
-    return query.all()
+        query = query.filter(GiftModel.isHighlighted == True)
+    
+    all_gifts = query.all()
+
+    for gift in all_gifts:
+        gift.promo_codes_count = sum(1 for pc in gift.promo_codes if not pc.is_used)
+
+    if from_admin:
+        return all_gifts
+
+    # Filter out promo gifts without available codes for regular users
+    filtered_gifts = [
+        gift for gift in all_gifts 
+        if not (gift.action_type == 'show_promo' and gift.promo_codes_count == 0)
+    ]
+    
+    return filtered_gifts
 
 @app.post("/gifts", response_model=List[schemas.GiftOut])
 def create_gift(gift: schemas.GiftCreate, db: Session = Depends(get_db)):

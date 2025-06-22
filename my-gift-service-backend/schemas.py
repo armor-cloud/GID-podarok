@@ -107,6 +107,7 @@ class GiftUpdate(BaseModel):
 
 class GiftOut(GiftBase):
     id: int
+    promo_codes_count: int = 0
     promo_codes: List[PromoCode] = []
 
     class Config:

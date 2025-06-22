@@ -1,13 +1,11 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-export interface PromoCode {
-  id: number;
-  code: string;
-  is_used: boolean;
-  used_at: string | null;
-}
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
 
 export interface PopupConfig {
   imageUrl?: string;
@@ -32,58 +30,46 @@ export interface Gift {
   isHighlighted: boolean;
   isClaimed: boolean;
   isHit: boolean;
-  redirect_url: string | null;
+  redirect_url?: string;
   action_type: 'redirect' | 'show_promo' | 'collect_email';
   popup_config?: PopupConfig;
-  promo_codes: PromoCode[];
-  points?: string;
+  promo_codes_count?: number;
 }
 
-export interface GiftInput {
-  logo: string;
-  title: string;
-  description: string;
-  isHighlighted: boolean;
-  isClaimed: boolean;
-  isHit: boolean;
-  redirect_url?: string | null;
-  action_type: string;
-  popup_config?: PopupConfig;
-}
+export type GiftInput = Omit<Gift, 'id' | 'promo_codes_count'>;
 
-export const getGifts = async (): Promise<Gift[]> => {
-  try {
-    const response = await axios.get(`${API_URL}/gifts`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching gifts:', error);
-    throw error;
-  }
+export const getGifts = async (fromAdmin = false): Promise<Gift[]> => {
+  const response = await api.get<Gift[]>('/gifts', {
+    params: { from_admin: fromAdmin },
+  });
+  return response.data;
 };
 
 export const createGift = async (gift: GiftInput): Promise<Gift[]> => {
-  try {
-    const response = await axios.post(`${API_URL}/gifts`, gift);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating gift:', error);
-    throw error;
-  }
+  const response = await api.post<Gift[]>('/gifts', gift);
+  return response.data;
 };
 
 export const updateGift = async (id: number, gift: GiftInput): Promise<Gift[]> => {
-  try {
-    const response = await axios.put(`${API_URL}/gifts/${id}`, gift);
-    return response.data;
-  } catch (error) {
-    console.error('Error updating gift:', error);
-    throw error;
-  }
+  const response = await api.put<Gift[]>(`/gifts/${id}`, gift);
+  return response.data;
 };
 
-export const deleteGift = async (id: number): Promise<void> => {
-  const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Ошибка удаления подарка');
+export const uploadPromoCodes = async (giftId: number, file: File): Promise<{ message: string }> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await api.post(`/gifts/${giftId}/promo_codes/upload`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const deleteGift = async (id: number): Promise<{ ok: boolean }> => {
+  const response = await api.delete(`/gifts/${id}`);
+  return response.data;
 };
 
 export const toggleHighlight = async (id: number, isHighlighted: boolean, gift: GiftInput): Promise<Gift[]> => {

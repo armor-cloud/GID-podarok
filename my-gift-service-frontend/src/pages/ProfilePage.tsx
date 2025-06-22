@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './ProfilePage.css';
-import { getGifts, deleteGift, createGift, updateGift } from '../api/giftService';
+import { getGifts, deleteGift, createGift, updateGift, uploadPromoCodes } from '../api/giftService';
 import type { Gift, GiftInput, PopupConfig } from '../api/giftService';
 import { taskService } from '../api/taskService';
 import type { Task } from '../api/taskService';
@@ -56,6 +56,7 @@ const ProfilePage: React.FC = () => {
   const [formGift, setFormGift] = useState<GiftInput>(initialGiftForm);
   const [editId, setEditId] = useState<number | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [promoCodeFile, setPromoCodeFile] = useState<File | null>(null);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState({
@@ -86,7 +87,7 @@ const ProfilePage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getGifts();
+      const data = await getGifts(true);
       setGifts(data);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Ошибка загрузки подарков');
@@ -114,7 +115,8 @@ const ProfilePage: React.FC = () => {
 
   const handleHighlightChange = async (gift: Gift, checked: boolean) => {
     try {
-      const updatedGifts = await updateGift(gift.id, { ...gift, isHighlighted: checked, redirect_url: gift.redirect_url || '' });
+      const { promo_codes_count, ...giftInput } = gift;
+      const updatedGifts = await updateGift(gift.id, { ...giftInput, isHighlighted: checked, redirect_url: gift.redirect_url || '' });
       setGifts(updatedGifts);
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : 'Ошибка обновления подарка');
@@ -123,7 +125,8 @@ const ProfilePage: React.FC = () => {
 
   const handleHitChange = async (gift: Gift, checked: boolean) => {
     try {
-      const updatedGifts = await updateGift(gift.id, { ...gift, isHit: checked, redirect_url: gift.redirect_url || '' });
+      const { promo_codes_count, ...giftInput } = gift;
+      const updatedGifts = await updateGift(gift.id, { ...giftInput, isHit: checked, redirect_url: gift.redirect_url || '' });
       setGifts(updatedGifts);
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : 'Ошибка обновления подарка');
@@ -201,6 +204,18 @@ const ProfilePage: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  const handlePromoCodeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type === 'text/plain') {
+        setPromoCodeFile(file);
+      } else {
+        alert('Пожалуйста, выберите файл в формате .txt');
+        e.target.value = '';
+      }
+    }
+  };
+
   const handlePopupImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -248,16 +263,36 @@ const ProfilePage: React.FC = () => {
     e.preventDefault();
     setFormLoading(true);
     try {
+      let updatedGifts: Gift[];
+      let targetGiftId: number;
+
       if (formMode === 'create') {
-        const createdGifts = await createGift(formGift);
-        setGifts(createdGifts);
-      } else if (formMode === 'edit' && editId !== null) {
-        const updatedGifts = await updateGift(editId, formGift);
-        setGifts(updatedGifts);
+        updatedGifts = await createGift(formGift);
+        const newGift = updatedGifts.find(g => g.title === formGift.title && g.description === formGift.description);
+        if (!newGift) throw new Error("Could not find the newly created gift.");
+        targetGiftId = newGift.id;
+      } else {
+        if (editId === null) throw new Error('Нет ID для редактирования');
+        updatedGifts = await updateGift(editId, formGift);
+        targetGiftId = editId;
       }
+
+      if (promoCodeFile && targetGiftId) {
+        try {
+          await uploadPromoCodes(targetGiftId, promoCodeFile);
+          alert('Промокоды успешно загружены.');
+        } catch (uploadError) {
+          alert(`Ошибка загрузки промокодов: ${uploadError instanceof Error ? uploadError.message : 'Неизвестная ошибка'}`);
+        }
+      }
+      
+      setGifts(updatedGifts);
       setShowForm(false);
+      setFormGift(initialGiftForm);
+      setPromoCodeFile(null);
+      setEditId(null);
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Ошибка сохранения подарка');
+      alert(`Ошибка сохранения: ${e instanceof Error ? e.message : 'Неизвестная ошибка'}`);
     } finally {
       setFormLoading(false);
     }
@@ -340,32 +375,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handlePromoCodeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    if (!editId) {
-      alert("Сначала сохраните подарок, чтобы загрузить промокоды.");
-      return;
-    }
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/gifts/${editId}/promo_codes/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.detail || "Ошибка загрузки файла");
-      }
-      alert(result.message);
-      fetchGiftsList(); // Refresh gifts to show new promo count
-    } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : 'Ошибка загрузки файла');
-    }
-  };
-
   return (
     <div className="profile-layout">
       <aside className="profile-sidebar">
@@ -432,9 +441,19 @@ const ProfilePage: React.FC = () => {
                       <option value="collect_email">Собрать email</option>
                     </select>
                   </div>
-                  {formGift.action_type === 'redirect' && (
+                  {(formGift.action_type === 'redirect' || formGift.action_type === 'show_promo') && (
                     <div className="form-group">
-                      <label htmlFor="redirect_url">URL для перехода</label>
+                      <label htmlFor="redirect_url">
+                        URL для перехода
+                        {formGift.action_type === 'show_promo' && (
+                          <span className="tooltip">
+                            <i className="fas fa-question-circle"></i>
+                            <span className="tooltip-text">
+                              Можно использовать плейсхолдер {'{promo}'}, он будет заменен на реальный промокод.
+                            </span>
+                          </span>
+                        )}
+                      </label>
                       <input
                         type="text"
                         id="redirect_url"
@@ -530,15 +549,22 @@ const ProfilePage: React.FC = () => {
 
                   {formGift.action_type === 'show_promo' && (
                     <div className="form-group">
-                      <label htmlFor="promo_codes_file">Файл с промокодами (.txt)</label>
+                      <label htmlFor="promo_codes_file">
+                        Файл с промокодами (.txt)
+                        <span className="tooltip">
+                          <i className="fas fa-question-circle"></i>
+                          <span className="tooltip-text">
+                            Загрузите .txt файл, где каждый промокод находится на новой строке. Существующие промокоды не будут затронуты, добавятся только новые.
+                          </span>
+                        </span>
+                      </label>
                       <input
                         type="file"
                         id="promo_codes_file"
                         name="promo_codes_file"
-                        accept=".txt,.csv"
-                        onChange={handlePromoCodeUpload}
+                        accept=".txt"
+                        onChange={handlePromoCodeFileChange}
                       />
-                      <p>Текущие промокоды: {gifts.find(g => g.id === editId)?.promo_codes?.length || 0}</p>
                     </div>
                   )}
                   <div className="gift-form-toggles-row">
@@ -574,13 +600,13 @@ const ProfilePage: React.FC = () => {
                       <GiftDetailsPopup
                         gift={{
                           id: -1,
-                          promo_codes: [],
                           ...formGift,
                           action_type: formGift.action_type as 'redirect' | 'show_promo' | 'collect_email',
                           redirect_url: formGift.redirect_url ?? '',
                           popup_config: formGift.popup_config ?? initialPopupConfig,
                         }}
                         onClose={() => {}}
+                        isPreview={true}
                       />
                     </div>
                   </div>
@@ -604,27 +630,30 @@ const ProfilePage: React.FC = () => {
                           <div className="gift-admin-title">{gift.title}</div>
                           <div className="gift-admin-desc">{gift.description}</div>
                           <div className="gift-meta">
-                            <span>Тип: <strong>{gift.action_type}</strong></span>
+                            <p><strong>ID:</strong> {gift.id}</p>
+                            <p><strong>Тип действия:</strong> {gift.action_type}</p>
                             {gift.action_type === 'show_promo' && (
-                              <span>Промокоды: <strong>{gift.promo_codes ? gift.promo_codes.length : 0}</strong></span>
+                              <p><strong>Доступно промокодов:</strong> {gift.promo_codes_count ?? 0}</p>
                             )}
                           </div>
                         </div>
-                        <label className="gift-admin-highlight">
-                          <input type="checkbox" checked={gift.isHighlighted} onChange={e => handleHighlightChange(gift, e.target.checked)} />
-                          <span></span>
-                          Показывать на витрине
-                        </label>
-                        <label className="gift-admin-highlight">
-                          <input type="checkbox" checked={gift.isHit} onChange={e => handleHitChange(gift, e.target.checked)} />
-                          <span></span>
-                          Хит
-                        </label>
                         <div className="gift-admin-actions">
-                          <button className="gift-admin-edit" onClick={() => openEditForm(gift)} aria-label="Редактировать подарок">Редактировать</button>
-                          <button className="gift-admin-delete" onClick={() => handleDelete(gift.id)} disabled={deletingId === gift.id} aria-label="Удалить подарок">
-                            {deletingId === gift.id ? 'Удаление...' : 'Удалить'}
-                          </button>
+                          <div className="gift-admin-toggles">
+                            <label className="gift-admin-highlight">
+                              <input type="checkbox" checked={!!gift.isHighlighted} onChange={e => handleHighlightChange(gift, e.target.checked)} />
+                              <span></span>
+                              Показывать на витрине
+                            </label>
+                            <label className="gift-admin-highlight">
+                              <input type="checkbox" checked={!!gift.isHit} onChange={e => handleHitChange(gift, e.target.checked)} />
+                              <span></span>
+                              Хит
+                            </label>
+                          </div>
+                          <div className="gift-admin-action-buttons">
+                            <button className="gift-admin-edit" onClick={() => openEditForm(gift)}>Редактировать</button>
+                            <button className="gift-admin-delete" onClick={() => handleDelete(gift.id)} disabled={deletingId === gift.id}>Удалить</button>
+                          </div>
                         </div>
                       </div>
                     ))}

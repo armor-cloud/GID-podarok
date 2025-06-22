@@ -5,9 +5,10 @@ import type { Gift } from '../api/giftService';
 interface GiftDetailsPopupProps {
   gift: Gift;
   onClose: () => void;
+  isPreview?: boolean;
 }
 
-const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose }) => {
+const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose, isPreview = false }) => {
   const [email, setEmail] = useState('');
   const [promoCode, setPromoCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +30,16 @@ const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose }) =>
   }, [onClose]);
 
   const handleClaim = async () => {
+    if (isPreview) {
+      if (gift.action_type === 'show_promo') {
+        setPromoCode('podarok');
+        setSuccessMessage('Ваш промокод готов!');
+      } else {
+        setError('Это действие недоступно в режиме предпросмотра.');
+      }
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccessMessage(null);
@@ -69,6 +80,17 @@ const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose }) =>
     }
   };
   
+  const copyAndGo = () => {
+    if (promoCode) {
+      navigator.clipboard.writeText(promoCode);
+      if (gift.redirect_url) {
+        const url = gift.redirect_url.replace('{promo}', promoCode);
+        window.open(url, '_blank');
+      }
+      onClose();
+    }
+  };
+  
   const renderActionSection = () => {
      if (error) {
       return <p className="popup-error">{error}</p>;
@@ -78,10 +100,19 @@ const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose }) =>
             <div className="popup-success">
                 <p>{successMessage}</p>
                 {promoCode && (
-                    <div className="promo-code-container">
-                        <strong>{promoCode}</strong>
-                        <button onClick={copyToClipboard} className="copy-btn">Копировать</button>
-                    </div>
+                    <>
+                        <div className="promo-code-container">
+                            <span className="promo-code-value">{promoCode}</span>
+                            <button onClick={copyToClipboard} className="copy-btn-icon" aria-label="Копировать промокод">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
+                        </div>
+                        {gift.redirect_url && (
+                            <button onClick={copyAndGo} className="copy-and-go-btn">
+                                Скопировать и перейти
+                            </button>
+                        )}
+                    </>
                 )}
             </div>
         );
