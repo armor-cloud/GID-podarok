@@ -10,6 +10,20 @@ import type { Task } from '../api/taskService';
 import { getGifts, type Gift } from '../api/giftService'; // BKLG-2: Use imported Gift type and getGifts
 import axios from 'axios';
 
+// Расширяем интерфейс Window, чтобы TypeScript знал о ym
+declare global {
+  interface Window {
+    ym?: (id: number, action: string, goalName: string) => void;
+  }
+}
+
+// Вспомогательная функция для отправки целей в Яндекс.Метрику
+const reachGoal = (goalName: string) => {
+  if (window.ym) {
+    window.ym(102911088, 'reachGoal', goalName);
+  }
+};
+
 const GiftPage: React.FC = () => {
   // Состояние для списка подарков
   const [gifts, setGifts] = useState<Gift[]>([]);
@@ -167,6 +181,7 @@ const GiftPage: React.FC = () => {
     // Находим выбранный подарок по ID и открываем попап деталей
     const gift = gifts.find(g => g.id === giftId);
     if (gift) {
+      reachGoal('VIEW_GIFT'); // <-- Отправляем цель в Метрику
       setSelectedGiftDetails(gift);
       setShowDetailsPopup(true);
     }
@@ -321,6 +336,8 @@ const GiftPage: React.FC = () => {
   // Функция для запуска вращения
   const handleSpin = () => {
     if (isSpinning || gifts.length === 0) return;
+
+    reachGoal('SPIN_WHEEL'); // <-- Отправляем цель в Метрику
     
     animationState.current.velocity = 0;
     animationState.current.targetScroll = null;

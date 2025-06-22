@@ -2,6 +2,20 @@ import React, { useState, useEffect } from 'react';
 import './GiftDetailsPopup.css';
 import type { Gift, UTMParameter } from '../api/giftService';
 
+// Расширяем интерфейс Window, чтобы TypeScript знал о ym
+declare global {
+  interface Window {
+    ym?: (id: number, action: string, goalName: string) => void;
+  }
+}
+
+// Вспомогательная функция для отправки целей в Яндекс.Метрику
+const reachGoal = (goalName: string) => {
+  if (window.ym) {
+    window.ym(102911088, 'reachGoal', goalName);
+  }
+};
+
 interface GiftDetailsPopupProps {
   gift: Gift;
   onClose: () => void;
@@ -43,6 +57,8 @@ const GiftDetailsPopup: React.FC<GiftDetailsPopupProps> = ({ gift, onClose, isPr
   }, [onClose]);
 
   const handleClaim = async () => {
+    reachGoal('CLAIM_GIFT'); // <-- Отправляем цель в Метрику
+
     if (isPreview) {
       if (gift.action_type === 'show_promo') {
         setPromoCode('podarok');
